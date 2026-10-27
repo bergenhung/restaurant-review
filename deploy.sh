@@ -34,9 +34,27 @@ echo "==> Service account"
 if ! gcloud iam service-accounts describe "$SA" >/dev/null 2>&1; then
   gcloud iam service-accounts create "$SA_NAME" --display-name="Restaurant review service"
 fi
-gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="serviceAccount:$SA" \
-  --role=roles/datastore.user --condition=None >/dev/null
 
+# Builds run as their own service account, separate from the app's, so the running app never gets
+# permission to read uploaded source or push images (and the project's default account needs no extra roles).
+BUILD_SA_NAME="${SERVICE}-build"
+BUILD_SA="${BUILD_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+
+echo "==> Build service account"
+if ! gcloud iam service-accounts describe "$BUILD_SA" >/dev/null 2>&1; then
+  gcloud iam service-accounts create "$BUILD_SA_NAME" --display-name="Restaurant review builds"
+fi
+# Cloud Run Builder: read the uploaded source, push the image to Artifact Registry, write build logs.
+if ! gcloud projects get-iam-policy "$PROJECT_ID" --flatten='bindings[].members' \
+     --filter="bindings.role=roles/run.builder AND bindings.members=serviceAccount:${BUILD_SA}" \
+     --format='value(bindings.role)' 2>/dev/null | grep -q run.builder; then
+  gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="serviceAccount:${BUILD_SA}" \
+    --role=roles/run.builder --condition=None >/dev/null
+  # New permissions take a minute or two to apply; building straight away fails with a 403.
+  echo "    Waiting 90s for the new permission to take effect..."
+  sleep 90
+fi
+ 
 echo "==> Secrets"
 SECRETS="GOOGLE_PLACES_API_KEY=google-places-api-key:latest"
 put_secret() {  # name value
@@ -84,6 +102,7 @@ gcloud run deploy "$SERVICE" \
   --source . \
   --region "$REGION" \
   --service-account "$SA" \
+  --build-service-account "projects/${PROJECT_ID}/serviceAccounts/${BUILD_SA}" \
   --allow-unauthenticated \
   --set-env-vars "$ENV_VARS" \
   --set-secrets "$SECRETS" \
