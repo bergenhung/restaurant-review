@@ -61,15 +61,22 @@ if [ -n "${TRIPADVISOR_API_KEY:-}" ] || gcloud secrets describe tripadvisor-api-
   SECRETS="$SECRETS,TRIPADVISOR_API_KEY=tripadvisor-api-key:latest"
 fi
 
-ENV_VARS="STORE=firestore,GCP_PROJECT=$PROJECT_ID,LOG_LEVEL=INFO"
-# Tripadvisor's daily cap is counted per running instance; with up to 3 instances the real
-# ceiling is up to 3x this, so the default here is lower than for local runs.
-ENV_VARS="$ENV_VARS,TRIPADVISOR_DAILY_ENTITY_LIMIT=${TRIPADVISOR_DAILY_ENTITY_LIMIT:-10},TRIPADVISOR_MARKETS=${TRIPADVISOR_MARKETS:-us,tw}"
-
+# Settings for the app. Values can contain commas (TRIPADVISOR_MARKETS=us,tw), so they're joined
+# with "@" and passed as "^@^A=1@B=2": the ^@^ prefix tells gcloud to split on @ instead of commas.
+ENV_LIST=(
+  "STORE=firestore"
+  "GCP_PROJECT=$PROJECT_ID"
+  "LOG_LEVEL=INFO"
+  # Tripadvisor's daily cap is counted per running instance; with up to 3 instances the real
+  # ceiling is up to 3x this, so the default here is lower than for local runs.
+  "TRIPADVISOR_DAILY_ENTITY_LIMIT=${TRIPADVISOR_DAILY_ENTITY_LIMIT:-10}"
+  "TRIPADVISOR_MARKETS=${TRIPADVISOR_MARKETS:-us,tw}"
+)
 # The map key is visible in the browser by design, so it's a plain setting rather than a secret.
 if [ -n "${GOOGLE_MAPS_BROWSER_KEY:-}" ]; then
-  ENV_VARS="$ENV_VARS,GOOGLE_MAPS_BROWSER_KEY=$GOOGLE_MAPS_BROWSER_KEY,GOOGLE_MAP_ID=${GOOGLE_MAP_ID:-DEMO_MAP_ID}"
+  ENV_LIST+=("GOOGLE_MAPS_BROWSER_KEY=$GOOGLE_MAPS_BROWSER_KEY" "GOOGLE_MAP_ID=${GOOGLE_MAP_ID:-DEMO_MAP_ID}")
 fi
+ENV_VARS="^@^$(IFS=@; echo "${ENV_LIST[*]}")"
 
 echo "==> Building and deploying"
 # max-instances caps spending if the service gets hammered; min-instances 0 means no cost when idle.
