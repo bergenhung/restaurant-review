@@ -103,7 +103,7 @@ gcloud run deploy "$SERVICE" \
   --region "$REGION" \
   --service-account "$SA" \
   --build-service-account "projects/${PROJECT_ID}/serviceAccounts/${BUILD_SA}" \
-  --allow-unauthenticated \
+  --no-invoker-iam-check \
   --set-env-vars "$ENV_VARS" \
   --set-secrets "$SECRETS" \
   --cpu 1 --memory 512Mi --concurrency 40 \
