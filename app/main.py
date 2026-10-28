@@ -30,13 +30,17 @@ async def lifespan(app: FastAPI):
     setup_logging(s.log_level)
     client = httpx.AsyncClient(timeout=httpx.Timeout(10.0))
     store = make_store(s.store, s.gcp_project, s.firestore_database)
-    ta_markets = {Market(m.strip()) for m in s.tripadvisor_markets.split(",") if m.strip() in ("us", "tw")}
+    def markets(text: str) -> set[Market]:
+        return {Market(m.strip()) for m in text.split(",") if m.strip() in ("us", "tw")}
+
+    ta_markets = markets(s.tripadvisor_markets)
     app.state.service = ReviewService(
         google=GooglePlaces(s.google_places_api_key, client),
         yelp=Yelp(s.yelp_api_key, client),
         michelin={Market.us: Michelin(s.michelin_us_csv_path), Market.tw: Michelin(s.michelin_tw_csv_path)},
         tripadvisor=Tripadvisor(s.tripadvisor_api_key, client, store, s.tripadvisor_base_url,
-                                s.tripadvisor_daily_entity_limit, ta_markets),
+                                s.tripadvisor_daily_entity_limit, ta_markets,
+                                markets(s.tripadvisor_fallback_markets)),
         store=store,
         settings=s,
     )
@@ -129,8 +133,12 @@ def parse_min_rating(value: str | None) -> float | None:
     return rating
 
 
-def respond(table: ResultTable, fmt: str):
+def respond(table: ResultTable, fmt: str, request: Request | None = None):
     refresh_hours(table)  # open/closed as of now, even for a cached result
+    ta = request.app.state.service.tripadvisor if request else None
+    if ta and ta.enabled and "tripadvisor" in table.sources_used:
+        # As of this response (not when it was cached). Counted per running copy of the app.
+        table.tripadvisor_usage = {"used_today": ta.spent_today, "daily_limit": ta.daily_limit or None}
     if fmt != "html":
         return table
     s = get_settings()
@@ -186,7 +194,7 @@ async def verify(
     table = await run(
         request.app.state.service.verify(name.strip(), location.strip(), market, place_id or None, session or None)
     )
-    return respond(table, format)
+    return respond(table, format, request)
 
 
 @app.get("/v1/nearby", response_model=ResultTable, summary="The restaurants closest to an address")
@@ -216,7 +224,7 @@ async def nearby(
             parse_min_rating(min_rating), sort, place_id or None, session or None, lat, lng,
         )
     )
-    return respond(table, format)
+    return respond(table, format, request)
 
 
 @app.get("/v1/locate", summary="Coordinates for an address or cross streets (used by the map picker)")

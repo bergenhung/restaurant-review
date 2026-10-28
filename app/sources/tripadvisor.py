@@ -3,11 +3,13 @@ a few recent reviews per restaurant.
 
 Cost control. Terra bills per "entity": every location a search returns counts as one, and each
 details or reviews call counts as one. Errors aren't billed. So this module:
-- finds the restaurant by name (narrowed to its postal code), falling back to a nearby search
-  around Google's coordinates for names written differently on each site, asking for at most
-  SEARCH_SIZE results each time;
-- remembers the Tripadvisor ID for each Google place for 30 days (no-matches for 7), so later
-  lookups skip the search and cost 2 entities (details + reviews);
+- finds the restaurant by name (narrowed to its postal code, at most NAME_SEARCH_SIZE results);
+  only in the markets listed in TRIPADVISOR_FALLBACK_MARKETS (default Taiwan, where Google and
+  Tripadvisor often write names in different languages) does a miss fall back to a nearby search;
+- remembers the Tripadvisor ID for each Google place for 30 days (no-matches for 7);
+- reuses a restaurant's rating for a day, and fetches its reviews at most once a week (the app
+  keeps every review it has seen, so refetching sooner adds little). A restaurant already
+  looked up today costs nothing; one looked up this week costs 1 entity (its rating);
 - stops for the rest of the UTC day once TRIPADVISOR_DAILY_ENTITY_LIMIT is reached, or as soon as
   Tripadvisor answers 429 (over your plan's limit).
 
@@ -30,7 +32,10 @@ from app.models import Market, Place, Review
 
 log = logging.getLogger(__name__)
 
-SEARCH_SIZE = 3            # each returned location is billed, so keep this small
+NAME_SEARCH_SIZE = 2       # each returned location is billed; name + postal code rarely needs more
+NEARBY_SIZE = 3
+SUMMARY_TTL_HOURS = 24     # rating, review count, listing link
+REVIEWS_EVERY_HOURS = 24 * 7
 NAME_SEARCH_MAX_KM = 1.0   # a same-named result further than this from Google's pin is another branch
 COUNTRY = {Market.us: "US", Market.tw: "TW"}
 SEARCH_RADIUS_KM = 0.3
@@ -52,13 +57,14 @@ class Tripadvisor:
     name = "tripadvisor"
 
     def __init__(self, api_key: str, client: httpx.AsyncClient, store, base_url: str, daily_limit: int,
-                 markets: set[Market] | None = None):
+                 markets: set[Market] | None = None, fallback_markets: set[Market] | None = None):
         self.api_key = api_key
         self.client = client
         self.store = store
         self.base_url = base_url.rstrip("/")
         self.daily_limit = daily_limit
         self.markets = markets if markets is not None else {Market.us, Market.tw}
+        self.fallback_markets = fallback_markets if fallback_markets is not None else {Market.tw}
         self._day = ""
         self._spent_today = 0
         self._blocked_day = ""
@@ -90,25 +96,32 @@ class Tripadvisor:
             raise BudgetExhausted()
         if self.daily_limit and self._spent_today + max_entities > self.daily_limit:
             raise BudgetExhausted()
-        resp = await self.client.get(
-            f"{self.base_url}{path}",
-            params=[("version", "1"), *params],
-            headers={"X-API-Key": self.api_key, "accept": "application/json"},
-        )
-        self._last_status = resp.status_code
-        if resp.status_code == 429:
-            self._blocked_day = today
-            log.warning("tripadvisor plan limit reached (429); paused until midnight UTC")
-            raise BudgetExhausted()
-        if resp.status_code in (401, 403):
-            log.error("tripadvisor rejected the API key; check TRIPADVISOR_API_KEY", extra={"status": resp.status_code})
-            return None
-        if resp.status_code != 200:
-            log.warning("tripadvisor call failed", extra={"kind": kind, "status": resp.status_code, "body": resp.text[:300]})
-            return None
-        data = resp.json()
-        billed = len(data.get("data", [])) if kind in ("nearby", "search") else 1
-        self._spent_today += billed
+        # Reserve the most this call could cost before sending it, so restaurants looked up at the
+        # same time can't all pass the check together and overshoot the cap; refund what isn't used.
+        self._spent_today += max_entities
+        billed = 0
+        try:
+            resp = await self.client.get(
+                f"{self.base_url}{path}",
+                params=[("version", "1"), *params],
+                headers={"X-API-Key": self.api_key, "accept": "application/json"},
+            )
+            self._last_status = resp.status_code
+            if resp.status_code == 429:
+                self._blocked_day = today
+                log.warning("tripadvisor plan limit reached (429); paused until midnight UTC")
+                raise BudgetExhausted()
+            if resp.status_code in (401, 403):
+                log.error("tripadvisor rejected the API key; check TRIPADVISOR_API_KEY", extra={"status": resp.status_code})
+                return None
+            if resp.status_code != 200:
+                log.warning("tripadvisor call failed", extra={"kind": kind, "status": resp.status_code, "body": resp.text[:300]})
+                return None
+            data = resp.json()
+            billed = len(data.get("data", [])) if kind in ("nearby", "search") else 1
+        finally:
+            if self._day == today:  # skip the refund if midnight passed and the count was reset
+                self._spent_today -= max_entities - billed
         if kind not in self._sampled:
             self._sampled.add(kind)
             log.info("tripadvisor sample response", extra={"kind": kind, "sample": resp.text[:1500]})
@@ -122,29 +135,44 @@ class Tripadvisor:
             status, location_id, location = await self._locate(google_place_id, name, lat, lng, market, address)
             if status != "matched":
                 return None, status
-            if location is None or _rating(location) is None:
-                location = await self._get(f"/locations/{location_id}", self._locale_params(market), 1, "details")
-                if not location:
-                    return None, "error"
-            place = _to_place(location_id, location)
-            reviews = await self._get(f"/locations/{location_id}/reviews",
-                                      [("language", REVIEW_LANGUAGE[market]), ("size", "10")], 1, "reviews")
-            if reviews:
-                place.reviews = [r for r in (_to_review(x) for x in reviews.get("data", [])) if r]
-            return place, "matched"
+            summary_key = f"ta-loc|{market.value}|{location_id}"
+            if cached := await self.store.get_cached(summary_key):
+                place = Place(**cached)  # rating looked up within the last day: free
+            else:
+                if location is None or _rating(location) is None:
+                    location = await self._get(f"/locations/{location_id}", self._locale_params(market), 1, "details")
+                    if not location:
+                        return None, "error"
+                place = _to_place(location_id, location)
+                await self.store.set_cached(summary_key, place.model_dump(mode="json", exclude={"reviews"}),
+                                            SUMMARY_TTL_HOURS)
         except BudgetExhausted:
             log.warning("tripadvisor skipped: daily limit reached", extra={"limit": self.daily_limit})
             return None, "limit"
 
+        # Reviews: at most once a week per restaurant. Earlier ones are already saved by the app.
+        reviews_key = f"ta-rev|{market.value}|{location_id}"
+        if not await self.store.get_cached(reviews_key):
+            try:
+                reviews = await self._get(f"/locations/{location_id}/reviews",
+                                          [("language", REVIEW_LANGUAGE[market]), ("size", "10")], 1, "reviews")
+            except BudgetExhausted:
+                reviews = None  # keep the rating we already have; try reviews another day
+            if reviews is not None:
+                place.reviews = [r for r in (_to_review(x) for x in reviews.get("data", [])) if r]
+                await self.store.set_cached(reviews_key, {"fetched": True}, REVIEWS_EVERY_HOURS)
+        return place, "matched"
+
     def _locale_params(self, market: Market) -> list[tuple[str, str]]:
         return [("locale", loc) for loc in NAME_LOCALES[market]] if self._locale_ok else []
 
-    async def _search(self, path: str, params: list[tuple[str, str]], market: Market, kind: str) -> dict | None:
-        found = await self._get(path, params + self._locale_params(market), SEARCH_SIZE, kind)
+    async def _search(self, path: str, params: list[tuple[str, str]], market: Market, kind: str,
+                      size: int) -> dict | None:
+        found = await self._get(path, params + self._locale_params(market), size, kind)
         if found is None and self._locale_ok and self._last_status in (400, 422):
             # If Terra doesn't accept the locale format, stop sending it and retry once.
             self._locale_ok = False
-            found = await self._get(path, params, SEARCH_SIZE, kind)
+            found = await self._get(path, params, size, kind)
         return found
 
     async def _locate(self, google_place_id, name, lat, lng, market, address) -> tuple[str, str, dict | None]:
@@ -159,20 +187,22 @@ class Tripadvisor:
         #    busy mall or food court is still found.
         postal = postal_code(address)
         params = [("query", name), ("search_type", "NAME"), ("category", "RESTAURANT"),
-                  ("country_code", COUNTRY[market]), ("size", str(SEARCH_SIZE))]
+                  ("country_code", COUNTRY[market]), ("size", str(NAME_SEARCH_SIZE))]
         if postal:
             params.append(("postal_code", postal))
-        found = await self._search("/locations/search", params, market, "search")
+        found = await self._search("/locations/search", params, market, "search", NAME_SEARCH_SIZE)
         if found is None:
             errored = True
         else:
             best = match_by_name(name, found.get("data", []), lat, lng, narrowed=bool(postal))
 
-        # 2) Nearby, for names written differently on each site (鼎泰豐 vs Din Tai Fung).
-        if not best and lat is not None and lng is not None:
+        # 2) Nearby, for names written differently on each site (鼎泰豐 vs Din Tai Fung). Only where
+        #    that's common (TRIPADVISOR_FALLBACK_MARKETS); elsewhere a name miss is almost always a
+        #    restaurant Tripadvisor doesn't list, and searching again would just cost more.
+        if not best and market in self.fallback_markets and lat is not None and lng is not None:
             params = [("lat", str(lat)), ("lon", str(lng)), ("radius", str(SEARCH_RADIUS_KM)), ("unit", "KM"),
-                      ("category", "RESTAURANT"), ("sort", "distance,asc"), ("size", str(SEARCH_SIZE))]
-            found = await self._search("/locations/nearby", params, market, "nearby")
+                      ("category", "RESTAURANT"), ("sort", "distance,asc"), ("size", str(NEARBY_SIZE))]
+            found = await self._search("/locations/nearby", params, market, "nearby", NEARBY_SIZE)
             if found is None:
                 errored = True
             else:

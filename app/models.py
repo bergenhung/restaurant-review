@@ -123,6 +123,8 @@ class ResultTable(BaseModel):
     query: dict
     market: Market
     center: Center | None = Field(None, description="The searched address (nearby mode only)")
+    tripadvisor_usage: dict | None = Field(
+        None, description="Billable Tripadvisor items used today by this copy of the app, and its daily cap")
     alternatives: list[Alternative] = Field(
         default_factory=list, description="Other branches matching the name, closest to the location first")
     generated_at: datetime

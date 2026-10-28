@@ -566,6 +566,11 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
             f"{''.join(cells)}<td>{recent}</td><td>{dishes}</td></tr>"
         )
     notes = "".join(f"<li>{escape(n)}</li>" for n in t.notes)
+    if t.tripadvisor_usage:
+        u = t.tripadvisor_usage
+        cap = f" of {u['daily_limit']}" if u.get("daily_limit") else ""
+        notes += (f"<li>Tripadvisor items used today: {u['used_today']}{cap} "
+                  "(resets at midnight UTC; counted per running copy of the app).</li>")
     q = _query_summary(t.query, nearby)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Restaurant ratings</title>{STYLE}</head><body><main>

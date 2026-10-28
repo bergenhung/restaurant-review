@@ -162,3 +162,32 @@ def test_market_at():
     assert market_at(25.033, 121.565) == Market.tw     # Taipei
     assert market_at(24.43, 118.32) == Market.tw       # Kinmen
     assert market_at(37.78, -122.39) == Market.us
+
+
+def test_tripadvisor_cap_holds_when_lookups_overlap():
+    """Several restaurants looked up at the same moment must not overshoot the daily cap."""
+    import asyncio
+    from httpx import Response
+    from app.sources.tripadvisor import Tripadvisor
+    from app.store import MemoryStore
+
+    class SlowClient:
+        calls = 0
+
+        async def get(self, url, params=None, headers=None):
+            SlowClient.calls += 1
+            await asyncio.sleep(0.01)  # all lookups are in flight together
+            return Response(200, json={"data": [{"id": 1, "names": ["Somewhere Else"]}]},
+                            request=__import__("httpx").Request("GET", url))
+
+    ta = Tripadvisor("k", SlowClient(), MemoryStore(), "https://terra.example/api", daily_limit=5,
+                     markets={Market.us}, fallback_markets=set())
+
+    async def run():
+        return await asyncio.gather(*(ta.find(f"g{i}", f"Place {i}", 1.0, 1.0, Market.us) for i in range(6)))
+
+    results = asyncio.run(run())
+    statuses = [status for _, status in results]
+    assert SlowClient.calls == 2          # only two 2-item searches fit within 5
+    assert statuses.count("limit") == 4
+    assert ta.spent_today <= 5

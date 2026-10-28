@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     tripadvisor_daily_entity_limit: int = 30
     # Markets that use Tripadvisor, comma-separated.
     tripadvisor_markets: str = "us,tw"
+    # Markets where a name miss is retried with a nearby search (names often differ by language).
+    tripadvisor_fallback_markets: str = "tw"
     # One Michelin list per market (Michelin has no public API).
     michelin_us_csv_path: str = "data/michelin_us.csv"
     michelin_tw_csv_path: str = "data/michelin_tw.csv"

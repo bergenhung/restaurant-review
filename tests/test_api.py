@@ -292,7 +292,7 @@ def test_tripadvisor_us(make_client, mock_apis):
     req = mock_apis.routes[SEARCH].calls[0].request
     assert req.headers["X-API-Key"] == "ta-key" and "key" not in req.url.params
     p = req.url.params
-    assert (p["query"], p["category"], p["country_code"], p["size"]) == ("Noodle House", "RESTAURANT", "US", "3")
+    assert (p["query"], p["category"], p["country_code"], p["size"]) == ("Noodle House", "RESTAURANT", "US", "2")
     assert p["version"] == "1" and p.get_list("locale") == ["en"]
     # Search results already carry the rating, so no separate details call.
     assert not mock_apis.routes[DETAILS].called
@@ -321,20 +321,34 @@ def test_tripadvisor_other_branch_only_is_not_a_match(make_client, mock_apis):
         data = c.get("/v1/verify", params={"name": "Far Away Ramen", "location": "Seattle"}).json()
         html = c.get("/v1/verify", params={"name": "Far Away Ramen", "location": "Seattle", "format": "html"}).text
     assert data["rows"][0]["source_status"]["tripadvisor"] == "no_match"
-    assert mock_apis.routes[NEARBY].called  # fell back to nearby, which found nothing either
+    # US names rarely differ by language, so a name miss doesn't pay for a nearby search too.
+    assert not mock_apis.routes[NEARBY].called
     assert "not found" in html
 
 
 def test_tripadvisor_ids_remembered(make_client, mock_apis):
     with make_client(yelp_key="", ta_key="ta-key") as c:
         c.get("/v1/nearby", params={"address": "Seattle"})
-        searches = len(mock_apis.routes[SEARCH].calls) + len(mock_apis.routes[NEARBY].calls)
+        calls = [len(mock_apis.routes[i].calls) for i in (NEARBY, DETAILS, REVIEWS, SEARCH)]
         # A different search (not cached) that returns the same restaurants.
         c.get("/v1/nearby", params={"address": "Seattle", "cuisine": "ramen"})
-    assert len(mock_apis.routes[SEARCH].calls) == 3
-    assert len(mock_apis.routes[SEARCH].calls) + len(mock_apis.routes[NEARBY].calls) == searches
-    assert len(mock_apis.routes[DETAILS].calls) == 1   # the remembered match needs a details call
+    assert calls == [0, 0, 1, 3]  # 3 name searches, reviews for the one match, no nearby (US)
+    # Second time: IDs, no-matches, the rating (1 day) and reviews (1 week) are all remembered.
+    assert [len(mock_apis.routes[i].calls) for i in (NEARBY, DETAILS, REVIEWS, SEARCH)] == calls
 
+
+def test_tripadvisor_rating_refetched_after_a_day_reviews_weekly(make_client, mock_apis):
+    import time
+    with make_client(yelp_key="", ta_key="ta-key") as c:
+        c.get("/v1/nearby", params={"address": "Seattle", "count": 1})
+        # Expire everything cached for a day or less, as if 25 hours had passed.
+        store = c.app.state.service.store
+        for k, (exp, v) in list(store._cache.items()):
+            if exp - time.time() < 26 * 3600:
+                store._cache[k] = (time.time() - 1, v)
+        c.get("/v1/nearby", params={"address": "Seattle", "count": 1, "cuisine": "x"})
+    assert len(mock_apis.routes[DETAILS].calls) == 1   # rating refreshed (1 item)
+    assert len(mock_apis.routes[REVIEWS].calls) == 1   # reviews not refetched within the week
 
 def test_tripadvisor_only_for_shown_rows(make_client, mock_apis):
     with make_client(yelp_key="", ta_key="ta-key") as c:
@@ -343,16 +357,16 @@ def test_tripadvisor_only_for_shown_rows(make_client, mock_apis):
 
 
 def test_tripadvisor_daily_limit(make_client, mock_apis):
-    # A search may bill up to 3 items, so a limit of 4 allows one search and one more item.
-    with make_client(yelp_key="", ta_key="ta-key", ta_limit=4) as c:
+    # Name searches reserve up to 2 items each. Cap 3: the first restaurant's search (1 item
+    # returned) and reviews (1) fit; the next search would need 2 more, so it's skipped.
+    with make_client(yelp_key="", ta_key="ta-key", ta_limit=3) as c:
         r = c.get("/v1/nearby", params={"address": "Seattle"})
         html = c.get("/v1/nearby", params={"address": "Seattle", "format": "html", "cuisine": "x"}).text
+        spent = c.app.state.service.tripadvisor.spent_today
     assert r.status_code == 200
-    assert len(mock_apis.routes[SEARCH].calls) == 1
     statuses = [row["source_status"]["tripadvisor"] for row in r.json()["rows"]]
-    assert statuses.count("limit") == 2
-    assert "daily limit" in html
-
+    assert statuses == ["matched", "limit", "limit"] and spent == 2
+    assert "daily limit" in html and "Tripadvisor items used today: 2 of 3" in html
 
 def test_tripadvisor_429_pauses_for_the_day(make_client, mock_apis):
     mock_apis.routes[SEARCH].mock(return_value=Response(429, json={"title": "Too Many Requests"}))

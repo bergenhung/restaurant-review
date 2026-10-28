@@ -157,14 +157,20 @@ Tripadvisor retired its old Content API on August 31, 2026; new keys come from i
 **Cost.** Terra bills per *entity*: every location a search returns is one, and each details or reviews call is one. Errors aren't billed. At the time of writing the first 1,000 entities are free **once per account (not monthly)**, then about $0.015 each, getting cheaper with volume. Check the pricing shown when you sign up.
 
 **How this project keeps that small**
-- Finds each restaurant by **name**, narrowed to its postal code and country, asking for at most 3 results. A same-named result must be within 1 km of Google's pin, so another branch of a chain isn't picked. Searching by name means a restaurant inside a mall or food court is still found even when other places are nearer the pin.
-- Falls back to a *nearby* search (3 results) only when the name search finds nothing, mainly for names written differently on each site (鼎泰豐 vs Din Tai Fung).
-- Remembers the Tripadvisor match per Google place for 30 days (no-matches for 7), so repeat lookups cost 2 entities.
+- Finds each restaurant by **name**, narrowed to its postal code and country, asking for at most 2 results. A same-named result must be within 1 km of Google's pin, so another branch of a chain isn't picked, and a restaurant inside a mall or food court is still found even when other places are nearer the pin.
+- Only in Taiwan (`TRIPADVISOR_FALLBACK_MARKETS=tw`) does a name miss fall back to a *nearby* search (3 results), because names there are often written in different languages on each site (鼎泰豐 vs Din Tai Fung). In the US a miss almost always means Tripadvisor doesn't list the place, so searching again would only cost more.
+- Remembers the Tripadvisor match per Google place for 30 days (no-matches for 7).
+- Reuses a restaurant's rating for a day, and fetches its reviews at most once a week. The app keeps every review it has seen, so refetching sooner adds little.
 - In near-an-address mode, only the restaurants shown (`count`, default 3) are looked up.
-- Caches whole searches for `CACHE_TTL_HOURS`.
-- Stops for the rest of the UTC day after `TRIPADVISOR_DAILY_ENTITY_LIMIT` entities (default 30 locally, 10 per instance on Cloud Run), or as soon as Tripadvisor returns 429. Rows then show Google and Michelin only.
+- Stops for the rest of the UTC day after `TRIPADVISOR_DAILY_ENTITY_LIMIT` items (default 30 locally, 10 per running copy on Cloud Run), or as soon as Tripadvisor returns 429. Items are reserved before each call, so lookups running at the same moment can't overshoot the cap. Each results page shows the day's count.
 
-Rough worst case: a fresh search for 3 nearby restaurants costs about 15 entities (more if several need the nearby fallback); with the default local cap of 30 a day, that's at most about $0.45 a day once the free allowance is used. The cap is counted in memory per running instance and resets on restart.
+| Restaurant… | Cost (items) |
+| --- | --- |
+| seen for the first time (US) | up to 3: name search ≤2 + reviews 1 |
+| seen for the first time (Taiwan, names differ) | up to 6: name search ≤2 + nearby ≤3 + reviews 1 |
+| already looked up today | 0 |
+| looked up earlier this week | 1 (rating) |
+| looked up 1–4 weeks ago | 2 (rating + reviews) |
 
 **Taiwan.** Reviews are requested in their original language (`language=primary`), so local Chinese reviews count. Google often returns Chinese names and Tripadvisor English ones, so when names are in different scripts the closest listing within 30 m is accepted if nothing else is nearby. Two same-script names that don't match are never paired.
 
