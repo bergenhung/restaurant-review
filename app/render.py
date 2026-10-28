@@ -5,6 +5,14 @@ from html import escape
 
 from app.models import ResultTable
 
+HEAD_ICONS = (
+    '<link rel="icon" href="/favicon.svg" type="image/svg+xml">'
+    '<link rel="icon" href="/favicon.ico" sizes="32x32">'
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png">'
+    '<link rel="manifest" href="/manifest.webmanifest">'
+    '<meta name="theme-color" content="#9a3412">'
+)
+
 STYLE = """
 <style>
 :root{--bg:#faf9f6;--fg:#1f1e1c;--muted:#6b6a65;--line:#e4e1d8;--accent:#9a3412;--accent-dark:#7c2d12;--chip:#f3efe6;--panel:#fff;--hl:#fdf1e7}
@@ -313,7 +321,7 @@ def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
                 '<p class="mapnote">The map needs GOOGLE_MAPS_BROWSER_KEY. Finding a spot above and '
                 '"Use my location" still work.</p>')
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cross-site restaurant review</title>{STYLE}</head><body><main>
+<title>Cross-site restaurant review</title>{HEAD_ICONS}{STYLE}</head><body><main>
 <h1>Cross-site restaurant review</h1><p class="sub">Find restaurants on Google Maps, then see what Tripadvisor and the Michelin Guide say about each one: ratings all time and for the last 3 months, and the dishes people mention.</p>
 <div class="modes" role="tablist" aria-label="Search mode">
 <button type="button" role="tab" id="tab-single" aria-controls="panel-single" aria-selected="true">One restaurant</button>
@@ -573,7 +581,7 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
                   "(resets at midnight UTC; counted per running copy of the app).</li>")
     q = _query_summary(t.query, nearby)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Restaurant ratings</title>{STYLE}</head><body><main>
+<title>Restaurant ratings</title>{HEAD_ICONS}{STYLE}</head><body><main>
 <h1>{escape(title)}</h1><p class="sub">{escape(q)} · market: {t.market.value.upper()} · <a href="/{'#nearby' if nearby else ''}">new search</a></p>
 {_alternatives_block(t)}
 {_map_block(t, maps_key, map_id)}

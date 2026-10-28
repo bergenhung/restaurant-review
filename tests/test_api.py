@@ -711,3 +711,17 @@ def test_search_page_start_options(make_client):
     assert 'id="pickmap"' not in no_key and "needs GOOGLE_MAPS_BROWSER_KEY" in no_key
     # The map script isn't in the page; it's added only when "Map or my location" is chosen.
     assert '<script async src="https://maps.googleapis.com' not in with_key
+
+
+def test_icons_served_and_linked(make_client):
+    with make_client(service_key="secret") as c:  # icons stay public even with an API key set
+        for path, kind in [("/favicon.ico", "image/x-icon"), ("/favicon.svg", "image/svg+xml"),
+                           ("/apple-touch-icon.png", "image/png"), ("/apple-touch-icon-precomposed.png", "image/png"),
+                           ("/icon-192.png", "image/png"), ("/icon-512.png", "image/png")]:
+            r = c.get(path)
+            assert r.status_code == 200 and r.headers["content-type"].startswith(kind), path
+            assert "max-age" in r.headers["cache-control"]
+        m = c.get("/manifest.webmanifest")
+        assert m.status_code == 200 and m.json()["icons"][0]["src"] == "/icon-192.png"
+        page = c.get("/").text
+    assert 'rel="apple-touch-icon"' in page and 'rel="manifest"' in page and "favicon.svg" in page

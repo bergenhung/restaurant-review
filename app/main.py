@@ -2,12 +2,13 @@
 import logging
 import time
 import uuid
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Literal
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from app.config import ENV_FILE, get_settings
 from app.hours import refresh as refresh_hours
@@ -68,7 +69,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-OPEN_PATHS = {"/", "/healthz", "/docs", "/openapi.json", "/redoc"}
+STATIC = Path(__file__).parent / "static"
+# Browsers and phones ask for these by fixed names; serving them avoids 404 warnings in the logs.
+ICONS = {
+    "/favicon.ico": ("favicon.ico", "image/x-icon"),
+    "/favicon.svg": ("icon.svg", "image/svg+xml"),
+    "/apple-touch-icon.png": ("apple-touch-icon.png", "image/png"),
+    "/apple-touch-icon-precomposed.png": ("apple-touch-icon.png", "image/png"),
+    "/icon-192.png": ("icon-192.png", "image/png"),
+    "/icon-512.png": ("icon-512.png", "image/png"),
+}
+OPEN_PATHS = {"/", "/healthz", "/docs", "/openapi.json", "/redoc", "/manifest.webmanifest", *ICONS}
 
 
 @app.middleware("http")
@@ -161,6 +172,39 @@ async def run(coro):
 async def home():
     s = get_settings()
     return search_page(s.google_maps_browser_key, s.google_map_id)
+
+
+def _icon_route(path: str, filename: str, media_type: str):
+    async def icon():
+        return FileResponse(STATIC / filename, media_type=media_type,
+                            headers={"Cache-Control": "public, max-age=604800"})  # a week
+    app.add_api_route(path, icon, methods=["GET"], include_in_schema=False)
+
+
+for _path, (_file, _type) in ICONS.items():
+    _icon_route(_path, _file, _type)
+
+
+@app.get("/manifest.webmanifest", include_in_schema=False)
+async def manifest():
+    """Lets Android's 'Add to Home screen' use the app's name and icon."""
+    return JSONResponse(
+        {
+            "name": "Cross-site restaurant review",
+            "short_name": "Restaurants",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#faf9f6",
+            "theme_color": "#9a3412",
+            "icons": [
+                {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+                {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"},
+                {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml"},
+            ],
+        },
+        media_type="application/manifest+json",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
 
 
 @app.get("/healthz", include_in_schema=False)
