@@ -12,6 +12,8 @@
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:?Set PROJECT_ID}"
+# Accept the project number too (e.g. 981869842988): some commands (Firestore) only take the ID.
+PROJECT_ID="$(gcloud projects describe "$PROJECT_ID" --format='value(projectId)')"
 REGION="${REGION:-us-west1}"
 SERVICE="${SERVICE:-restaurant-review}"
 SA_NAME="${SERVICE}-sa"
@@ -21,7 +23,13 @@ gcloud config set project "$PROJECT_ID" >/dev/null
 
 echo "==> Enabling APIs"
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com \
-  firestore.googleapis.com secretmanager.googleapis.com places.googleapis.com
+  firestore.googleapis.com secretmanager.googleapis.com places.googleapis.com \
+  geocoding-backend.googleapis.com maps-backend.googleapis.com
+
+# Builds run as their own service account, separate from the app's, so the running app never gets
+# permission to read uploaded source or push images (and the project's default account needs no extra roles).
+BUILD_SA_NAME="${SERVICE}-build"
+BUILD_SA="${BUILD_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 echo "==> Firestore (Native mode, free tier applies to the (default) database)"
 if ! gcloud firestore databases describe --database="(default)" >/dev/null 2>&1; then
@@ -34,11 +42,8 @@ echo "==> Service account"
 if ! gcloud iam service-accounts describe "$SA" >/dev/null 2>&1; then
   gcloud iam service-accounts create "$SA_NAME" --display-name="Restaurant review service"
 fi
-
-# Builds run as their own service account, separate from the app's, so the running app never gets
-# permission to read uploaded source or push images (and the project's default account needs no extra roles).
-BUILD_SA_NAME="${SERVICE}-build"
-BUILD_SA="${BUILD_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="serviceAccount:$SA" \
+  --role=roles/datastore.user --condition=None >/dev/null
 
 echo "==> Build service account"
 if ! gcloud iam service-accounts describe "$BUILD_SA" >/dev/null 2>&1; then
@@ -54,7 +59,7 @@ if ! gcloud projects get-iam-policy "$PROJECT_ID" --flatten='bindings[].members'
   echo "    Waiting 90s for the new permission to take effect..."
   sleep 90
 fi
- 
+
 echo "==> Secrets"
 SECRETS="GOOGLE_PLACES_API_KEY=google-places-api-key:latest"
 put_secret() {  # name value
@@ -103,7 +108,7 @@ gcloud run deploy "$SERVICE" \
   --region "$REGION" \
   --service-account "$SA" \
   --build-service-account "projects/${PROJECT_ID}/serviceAccounts/${BUILD_SA}" \
-  --no-invoker-iam-check \
+  --allow-unauthenticated \
   --set-env-vars "$ENV_VARS" \
   --set-secrets "$SECRETS" \
   --cpu 1 --memory 512Mi --concurrency 40 \
@@ -113,4 +118,20 @@ gcloud run deploy "$SERVICE" \
 URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
 echo
 echo "Deployed: $URL"
-echo "Try:      $URL/v1/top?location=Seattle&cuisine=ramen&format=html"
+
+# --allow-unauthenticated can fail with only a warning (e.g. an organization policy blocks
+# public access), so check the site really answers before saying it's ready.
+STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/healthz" || true)
+if [ "$STATUS" = "200" ]; then
+  echo "Open:     $URL/"
+elif [ "$STATUS" = "403" ]; then
+  echo "WARNING: the service is running but not public (403). Allow public access with:" >&2
+  echo "  gcloud run services add-iam-policy-binding $SERVICE --region $REGION --member=allUsers --role=roles/run.invoker" >&2
+  echo "or, if an organization policy blocks that:" >&2
+  echo "  gcloud run services update $SERVICE --region $REGION --no-invoker-iam-check" >&2
+else
+  echo "WARNING: health check returned HTTP $STATUS. Check the logs: Cloud Run > $SERVICE > Logs." >&2
+fi
+echo
+echo "If you use the map: add  $URL/*  to the map key's website restrictions"
+echo "(APIs & Services > Credentials > your browser key > Websites)."

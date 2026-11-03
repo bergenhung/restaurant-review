@@ -85,7 +85,8 @@ def test_dishes_skip_descriptions():
     ])]
     # Mentioned by two reviewers; nothing generic like "variety of dishes" or "things".
     assert extract_dishes(reviews) == ["vegan dumplings"]
-    assert extract_dishes(reviews[2:]) == ["green beans"]
+    # One reviewer alone isn't enough to call something a top dish.
+    assert extract_dishes(reviews[2:]) == []
 
 
 def test_dishes_only_food():
@@ -100,9 +101,7 @@ def test_dishes_only_food():
     reviews = [Review(source="g", review_id=str(i), text=t) for i, t in enumerate(texts)]
     dishes = extract_dishes(reviews)
     assert set(dishes) == {"local chopped salad", "pizzas"}  # each mentioned by two reviewers
-    singles = extract_dishes(reviews[:3])
-    assert "annoyed face" not in singles and "version" not in singles and "pleasure" not in singles
-    assert "set omakase" in singles and "sushi" in singles
+    assert extract_dishes(reviews[:3]) == []  # nothing mentioned twice
 
 
 def _hours(periods, offset=-420):
@@ -209,3 +208,24 @@ def test_michelin_only_at_the_listed_place(tmp_path):
     assert m.lookup("Big Bowl", "", 25.03381, 121.5322) is None
     # No position and no address to confirm the city: not claimed.
     assert m.lookup("Din Tai Fung") is None
+
+
+def test_dishes_from_google_summary_come_first():
+    """Bouche: one review mentioning crepes shouldn't make crepes a top dish; Google's summary leads."""
+    reviews = [Review(source="g", review_id="1", text="Loved the crepe for dessert."),
+               Review(source="g", review_id="2", text="Great wine list."),
+               Review(source="g", review_id="3", text="The duck breast was amazing."),
+               Review(source="g", review_id="4", text="Order the duck breast.")]
+    summary = ("Diners praise the duck breast, pork tenderloin and chocolate financier, "
+               "along with the friendly service and cozy atmosphere.")
+    assert extract_dishes(reviews, summary=summary) == ["duck breast", "pork tenderloin", "chocolate financier"]
+    assert extract_dishes(reviews) == ["duck breast"]  # no crepe: only one reviewer mentioned it
+
+
+def test_tripadvisor_exact_name_wins_over_similar():
+    from app.sources.tripadvisor import match_by_name
+    bouche = {"id": 2589752, "names": ["Bouche"]}
+    bouchon = {"id": 1, "names": ["Bouchon"]}
+    # Narrowed to the postal code; no coordinates in the results: the exact name is taken.
+    assert match_by_name("Bouche", [bouchon, bouche], None, None, narrowed=True) is bouche
+    assert match_by_name("Bouche", [bouchon], None, None, narrowed=True) is bouchon  # only a similar name

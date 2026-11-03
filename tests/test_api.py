@@ -43,7 +43,10 @@ def test_nearby_rating_order_and_merges_yelp(make_client, mock_apis):
     assert locate == {"textQuery": "Seattle, WA", "pageSize": 1}
     body = json.loads(mock_apis.routes[0].calls[1].request.content)
     assert body["textQuery"] == "ramen restaurant" and body["rankPreference"] == "DISTANCE"
-    assert body["locationBias"]["circle"]["radius"] == 1000
+    # Restricted to the area (a box around the 1 km circle), not just biased towards it.
+    box = body["locationRestriction"]["rectangle"]
+    assert box["low"]["latitude"] < 47.6 < box["high"]["latitude"]
+    assert abs((box["high"]["latitude"] - box["low"]["latitude"]) / 2 - 1000 / 111_320) < 1e-6
     assert body["priceLevels"] == ["PRICE_LEVEL_INEXPENSIVE", "PRICE_LEVEL_MODERATE"]
     assert body["languageCode"] == "en"
 
@@ -143,7 +146,8 @@ def test_no_yelp_key_gives_yelp_links(make_client, mock_apis):
 
 def test_verify_taiwan_uses_michelin(make_client, mock_apis):
     mock_apis.routes[0].mock(return_value=Response(200, json={"places": [
-        google_place("t1", "範例小籠包", 4.4, 5200, address="台北市信義區", reviews=[(5, "必點蟹粉小籠包,真的超好吃", 7)]),
+        google_place("t1", "範例小籠包", 4.4, 5200, address="台北市信義區", reviews=[
+            (5, "必點蟹粉小籠包,真的超好吃", 7), (4, "推薦蟹粉小籠包", 20)]),
     ]}))
     with make_client() as c:
         r = c.get("/v1/verify", params={"name": "範例小籠包", "location": "台北"})
@@ -638,10 +642,21 @@ def _geocode_ok(req):
         "geometry": {"location": {"lat": 37.7897, "lng": -122.3972}}, "types": ["intersection"]}]})
 
 
+def _search_center(body: dict) -> dict:
+    """Where a Google search is centred: the circle of a nearby search, or the middle of a text search's box."""
+    area = body.get("locationRestriction") or body.get("locationBias") or {}
+    if "circle" in area:
+        return area["circle"]["center"]
+    if "rectangle" in area:
+        lo, hi = area["rectangle"]["low"], area["rectangle"]["high"]
+        return {"latitude": (lo["latitude"] + hi["latitude"]) / 2, "longitude": (lo["longitude"] + hi["longitude"]) / 2}
+    return {}
+
+
 def _sf_or_taipei(req):
     """Restaurant searches near San Francisco or Taipei, depending on where the search is centred."""
     body = json.loads(req.content)
-    center = (body.get("locationBias") or {}).get("circle", {}).get("center", {})
+    center = _search_center(body)
     return (_xinyi_branches if center.get("latitude", 0) < 30 else _places_with_hours)(req)
 
 
@@ -676,9 +691,11 @@ def test_nearby_from_a_pin(make_client, mock_apis):
         tw = c.get("/v1/nearby", params={"lat": 25.0330, "lng": 121.5654}).json()
     assert data["center"]["label"] == "330 1st St, San Francisco, CA 94105, USA" and data["market"] == "us"
     assert tw["market"] == "tw" and "Taipei" in tw["center"]["label"]
-    # No address lookup: the first Google call is the restaurant search around the pin.
-    body = json.loads(mock_apis.routes[0].calls[0].request.content)
-    assert body["locationBias"]["circle"]["center"] == {"latitude": 37.786, "longitude": -122.393}
+    # No address lookup: the first Google call is the nearby search around the pin.
+    first = next(c for c in mock_apis.calls if "places.googleapis.com" in str(c.request.url))
+    assert str(first.request.url).endswith(":searchNearby")
+    area = json.loads(first.request.content)["locationRestriction"]["circle"]
+    assert area["center"] == {"latitude": 37.786, "longitude": -122.393} and area["radius"] == 1000
 
 
 def test_pin_without_reverse_geocoding_still_works(make_client, mock_apis):
@@ -728,3 +745,61 @@ def test_icons_served_and_linked(make_client):
         assert m.status_code == 200 and m.json()["icons"][0]["src"] == "/icon-192.png"
         page = c.get("/").text
     assert 'rel="apple-touch-icon"' in page and 'rel="manifest"' in page and "favicon.svg" in page
+
+
+def _north_beach(req):
+    """Address lookup -> Broadway & Columbus; nearby search -> the closest restaurants (mixed prices);
+    text search in the area -> one more $$$ place further out."""
+    body = json.loads(req.content)
+    base = (37.7980, -122.4065)
+    if body.get("pageSize") == 1 and "rankPreference" not in body:
+        return Response(200, json={"places": [{"location": {"latitude": base[0], "longitude": base[1]},
+                                               "formattedAddress": "Broadway, San Francisco, CA, USA"}]})
+    def at(pid, name, dlat, price, rating=4.5):
+        p = google_place(pid, name, rating, 500, price=price, address="San Francisco, CA 94133, USA")
+        p["location"] = {"latitude": base[0] + dlat, "longitude": base[1]}
+        return p
+    if "includedTypes" in body:  # nearby search: nearest first, no price filter
+        return Response(200, json={"places": [
+            at("n1", "Corner Pizza", 0.0005, "PRICE_LEVEL_INEXPENSIVE"),
+            at("n2", "Tosca-ish Cafe", 0.0010, "PRICE_LEVEL_EXPENSIVE"),
+            at("n3", "Noodle Spot", 0.0015, "PRICE_LEVEL_MODERATE"),
+            at("n4", "China Live-ish", 0.0020, "PRICE_LEVEL_EXPENSIVE"),
+            at("n5", "Low Rated Grill", 0.0025, "PRICE_LEVEL_EXPENSIVE", rating=3.6),
+        ]})
+    return Response(200, json={"places": [at("t1", "Bouche-ish", 0.0075, "PRICE_LEVEL_EXPENSIVE"),
+                                          at("n2", "Tosca-ish Cafe", 0.0010, "PRICE_LEVEL_EXPENSIVE")]})
+
+
+def test_nearby_finds_the_closest_matching_restaurants(make_client, mock_apis):
+    """Closest $$$, 4.0+ places come from Google's nearby search; text search only tops up."""
+    mock_apis.routes[0].mock(side_effect=_north_beach)
+    with make_client(yelp_key="") as c:
+        two = c.get("/v1/nearby", params={"address": "Broadway, San Francisco", "price": "$$$",
+                                          "min_rating": "4.0", "count": 2}).json()
+        three = c.get("/v1/nearby", params={"address": "Broadway, San Francisco", "price": "$$$",
+                                            "min_rating": "4.0", "count": 3}).json()
+    assert [r["name"] for r in two["rows"]] == ["Tosca-ish Cafe", "China Live-ish"]
+    assert [r["name"] for r in three["rows"]] == ["Tosca-ish Cafe", "China Live-ish", "Bouche-ish"]
+    texts = [json.loads(c.request.content) for c in mock_apis.routes[0].calls]
+    area = [b for b in texts if b.get("textQuery") == "restaurant"]
+    assert len(area) == 1  # only the 3-restaurant request needed the top-up
+    assert area[0]["priceLevels"] == ["PRICE_LEVEL_EXPENSIVE"] and area[0]["minRating"] == 4.0
+
+
+def test_review_summary_shown_with_attribution(make_client, mock_apis):
+    place = google_place("b1", "Bouche", 4.5, 750, price="PRICE_LEVEL_EXPENSIVE",
+                         reviews=[(5, "Loved the crepe for dessert.", 4)])
+    place["reviewSummary"] = {
+        "text": {"text": "Diners praise the duck breast, pork tenderloin and chocolate financier.", "languageCode": "en-US"},
+        "disclosureText": {"text": "Summarized with Gemini", "languageCode": "en-US"},
+        "reviewsUri": "https://www.google.com/maps/place//data=reviews",
+    }
+    mock_apis.routes[0].mock(return_value=Response(200, json={"places": [place]}))
+    with make_client(yelp_key="") as c:
+        data = c.get("/v1/nearby", params={"address": "Seattle"}).json()
+        html = c.get("/v1/nearby", params={"address": "Seattle", "format": "html"}).text
+    row = data["rows"][0]
+    assert row["top_dishes"] == ["duck breast", "pork tenderloin", "chocolate financier"]
+    assert row["recent_3_months"]["average"] is None and row["recent_3_months"]["review_count"] == 1
+    assert "Summarized with Gemini" in html and "data=reviews" in html and "too few recent reviews" in html

@@ -104,6 +104,12 @@ def mock_apis():
         router.get(url__regex=rf"{TA}/locations/\d+(\?|$)").mock(side_effect=_ta_details)
         router.get(url__regex=rf"{TA}/locations/\d+/reviews").mock(return_value=Response(200, json=TA_REVIEWS()))
         router.get(f"{TA}/locations/search").mock(side_effect=_ta_search)
+
+        # Nearby search answers like text search does in each test (whatever routes[0] is set to).
+        def _nearby(req):
+            text_route = router.routes[0]
+            return text_route.side_effect(req) if text_route.side_effect else text_route.return_value
+        router.post("https://places.googleapis.com/v1/places:searchNearby").mock(side_effect=_nearby)
         yield router
 
 
