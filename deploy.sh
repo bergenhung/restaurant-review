@@ -96,7 +96,21 @@ ENV_LIST=(
   "TRIPADVISOR_MARKETS=${TRIPADVISOR_MARKETS:-us,tw}"
 )
 # The map key is visible in the browser by design, so it's a plain setting rather than a secret.
+# --set-env-vars replaces every setting, so a value not exported in this shell would be erased.
+# Keep the map settings already on the service unless new ones are given.
+current_env() {  # name -> its value on the deployed service, or empty
+  gcloud run services describe "$SERVICE" --region "$REGION" --format=json 2>/dev/null | python3 -c '
+import json, sys
+try:
+    c = json.load(sys.stdin)["spec"]["template"]["spec"]["containers"][0]
+    print({e["name"]: e.get("value", "") for e in c.get("env", [])}.get(sys.argv[1], ""))
+except Exception:
+    pass' "$1" || true
+}
+GOOGLE_MAPS_BROWSER_KEY="${GOOGLE_MAPS_BROWSER_KEY:-$(current_env GOOGLE_MAPS_BROWSER_KEY)}"
+GOOGLE_MAP_ID="${GOOGLE_MAP_ID:-$(current_env GOOGLE_MAP_ID)}"
 if [ -n "${GOOGLE_MAPS_BROWSER_KEY:-}" ]; then
+  echo "==> Map key: kept/set (ends ...${GOOGLE_MAPS_BROWSER_KEY: -4})"
   ENV_LIST+=("GOOGLE_MAPS_BROWSER_KEY=$GOOGLE_MAPS_BROWSER_KEY" "GOOGLE_MAP_ID=${GOOGLE_MAP_ID:-DEMO_MAP_ID}")
 fi
 ENV_VARS="^@^$(IFS=@; echo "${ENV_LIST[*]}")"

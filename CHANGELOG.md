@@ -36,6 +36,9 @@ What changed in the app (P0) and the infrastructure, newest first.
   in "z", so `/healthz` gets Google's own 404 on the deployed site. (`app/main.py`)
 - **`deploy.sh` keeps the map key:** if `GOOGLE_MAPS_BROWSER_KEY` / `GOOGLE_MAP_ID` aren't exported,
   the values already on the service are reused instead of being erased.
+- **Cross streets that Google can't place as a corner** (e.g. "Broadway & Columbus" matching a
+  street in Columbus, OH) now get a clear message asking for the city, instead of searching the
+  wrong place. (`app/sources/google_places.py`, `app/main.py`)
 - Cached results from before these changes aren't reused.
 
 ### Added
