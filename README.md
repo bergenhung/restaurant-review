@@ -7,7 +7,7 @@ A small web service that puts a restaurant's ratings from several review sites s
   The starting point can be an **address**, **cross streets** ("1st St" & "Mission St", San Francisco, or 忠孝東路 & 敦化南路, 台北), or a **point**: click the map to drop a pin (drag it to adjust), search for a spot, or press **Use my location**. The map loads only when that option is chosen, so other page views don't count as Google map loads.
 - **Verify one restaurant**: "Is this place actually good?" The Location can be a city, district, street or landmark ("Xinyi District, Taipei", "Taipei 101"). When a chain has several branches, the one closest to that location is shown, and the others are listed as one-click links.
 
-The home page opens on **Restaurants near an address**; **One restaurant** is the second tab (link straight to it with `/#single`).
+Results pages show the search as a filled-in form, so a filter can be changed without starting over. The home page opens on **Restaurants near an address**; **One restaurant** is the second tab (link straight to it with `/#single`).
 
 In both modes Google Maps is the starting point: the restaurants shown are the ones Google returns. Each is then looked up directly on Tripadvisor and checked against the Michelin Guide list (shown, with a link to its Guide page, only when it's the listed restaurant at that location). US rows also get a link to look the place up on Yelp yourself.
 

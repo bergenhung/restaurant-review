@@ -2,6 +2,16 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-03 (later)
+
+### Added
+- **Change a search from the results page.** The results page shows the search as a filled-in form
+  (start point, how many, distance, cuisine, price, rating, order for nearby; restaurant and
+  location for one restaurant). Change anything and press Update. The start point is reused as a
+  map point, so no address lookup is repeated; editing the "Near" text searches from the new
+  address instead. (`app/render.py`, `app/service.py`, `app/main.py`)
+- `/v1/nearby` accepts `label`, a name for a `lat`/`lng` start point that's already known.
+
 ## 2026-11-03
 
 ### Fixed
@@ -24,6 +34,8 @@ What changed in the app (P0) and the infrastructure, newest first.
   the language setting if Terra rejects that too. (`app/sources/tripadvisor.py`)
 - **Health check:** `deploy.sh` and `ship.sh` check `/health`. Cloud Run reserves some paths ending
   in "z", so `/healthz` gets Google's own 404 on the deployed site. (`app/main.py`)
+- **`deploy.sh` keeps the map key:** if `GOOGLE_MAPS_BROWSER_KEY` / `GOOGLE_MAP_ID` aren't exported,
+  the values already on the service are reused instead of being erased.
 - Cached results from before these changes aren't reused.
 
 ### Added

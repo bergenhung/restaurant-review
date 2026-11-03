@@ -205,6 +205,7 @@ class ReviewService:
         session_token: str | None = None,
         lat: float | None = None,
         lng: float | None = None,
+        label: str | None = None,
     ) -> ResultTable:
         """The `count` restaurants closest to a starting point, found on Google, each then looked up
         on Tripadvisor and Michelin. The start is an address, cross streets ("1st St & Mission St,
@@ -212,7 +213,8 @@ class ReviewService:
         self._require_google()
         if lat is not None and lng is not None:
             market = market or market_at(lat, lng)
-            label = await self._describe_point(lat, lng, market) or address or f"the pin at {lat:.5f}, {lng:.5f}"
+            # A search changed on the results page passes its known label: no need to look it up again.
+            label = label or await self._describe_point(lat, lng, market) or address or f"the pin at {lat:.5f}, {lng:.5f}"
         else:
             located = await self._locate(address, place_id, session_token)
             if not located:
@@ -256,6 +258,14 @@ class ReviewService:
                 found.setdefault(p.source_id, p)
         candidates = sorted(((distance_km(lat, lng, p.lat, p.lng), p) for p in found.values() if passes(p)),
                             key=lambda t: t[0])[:count]
+        if len(candidates) < count:
+            # Why places were left out, so a thin result can be explained from the log.
+            log.info("nearby filtered", extra={
+                "found": len(found), "kept": len(candidates),
+                "places": [{"name": p.name, "km": round(distance_km(lat, lng, p.lat, p.lng), 2) if p.lat else None,
+                            "price_level": p.price_level, "price_range": p.price_range, "rating": p.rating,
+                            "status": p.business_status} for p in list(found.values())[:25]],
+            })
         if not candidates:
             filters = " with those filters" if (cuisine or price_levels or min_rating) else ""
             raise NotFound(f"No restaurants{filters} within {within_km:g} km of {label}. Try a larger distance.")

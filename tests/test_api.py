@@ -804,3 +804,31 @@ def test_review_summary_shown_with_attribution(make_client, mock_apis):
     assert row["top_dishes"] == ["duck breast", "pork tenderloin", "chocolate financier"]
     assert row["recent_3_months"]["average"] is None and row["recent_3_months"]["review_count"] == 1
     assert "Summarized with Gemini" in html and "data=reviews" in html and "too few recent reviews" in html
+
+
+def test_results_page_has_the_search_filled_in(make_client, mock_apis):
+    """Change one filter on the results page instead of starting over."""
+    mock_apis.routes[0].mock(side_effect=_north_beach)
+    params = {"address": "Broadway, San Francisco", "price": "$$$", "min_rating": "4.0", "count": 2,
+              "within_km": 0.5, "cuisine": "", "sort": "rating", "format": "html"}
+    with make_client(yelp_key="") as c:
+        html = c.get("/v1/nearby", params=params).text
+        bar = html[html.index('class="editbar"'):html.index("</form>", html.index('class="editbar"'))]
+        assert 'name="lat" value="37.798"' in bar and 'name="label" value="Broadway, San Francisco, CA, USA"' in bar
+        for selected in ('<option value="2" selected>', '<option value="0.5" selected>', '<option value="$$$" selected>',
+                         '<option value="4.0" selected>', '<option value="rating" selected>'):
+            assert selected in bar, selected
+        # Submitting the bar again (now with 3 results) reuses the point and its name: no address lookup.
+        before = len(mock_apis.routes[0].calls)
+        again = c.get("/v1/nearby", params={"lat": 37.798, "lng": -122.4065, "label": "Broadway, San Francisco, CA, USA",
+                                            "price": "$$$", "min_rating": "4.0", "count": 3, "within_km": 1}).json()
+    assert again["center"]["label"] == "Broadway, San Francisco, CA, USA" and len(again["rows"]) == 3
+    calls = [json.loads(x.request.content) for x in mock_apis.routes[0].calls[before:]]
+    assert not any(b.get("pageSize") == 1 and "rankPreference" not in b for b in calls)
+
+
+def test_one_restaurant_results_have_the_search_filled_in(make_client, mock_apis):
+    with make_client() as c:
+        html = c.get("/v1/verify", params={"name": "Noodle House", "location": "Seattle", "format": "html"}).text
+    assert 'action="/v1/verify"' in html and 'name="name" value="Noodle House"' in html
+    assert 'name="location" value="Seattle"' in html

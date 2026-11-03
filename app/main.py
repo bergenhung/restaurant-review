@@ -16,7 +16,7 @@ from app.logging_setup import request_id_var, setup_logging, trace_var
 from app.models import Market, ResultTable, Suggestion
 from app.render import search_page, table_page
 from app.service import NotFound, ReviewService, SourceUnavailable
-from app.sources.google_places import GooglePlaces
+from app.sources.google_places import AmbiguousLocation, GooglePlaces
 from app.sources.michelin import Michelin
 from app.sources.tripadvisor import Tripadvisor
 from app.sources.yelp import Yelp
@@ -161,6 +161,8 @@ async def run(coro):
         return await coro
     except NotFound as e:
         raise HTTPException(404, str(e))
+    except AmbiguousLocation as e:
+        raise HTTPException(422, str(e))
     except SourceUnavailable as e:
         raise HTTPException(503, str(e))
     except httpx.HTTPError:
@@ -258,6 +260,7 @@ async def nearby(
     sort: Literal["distance", "rating"] = Query("distance", description="Order of the results"),
     lat: float | None = Query(None, ge=-90, le=90, description="Start from this point (a map pin or your location)"),
     lng: float | None = Query(None, ge=-180, le=180),
+    label: str | None = Query(None, max_length=200, description="Name for the lat/lng point, if already known"),
     market: Market | None = Query(None, description="us or tw; detected from the address if omitted"),
     format: Literal["json", "html"] = "json",
 ):
@@ -269,6 +272,7 @@ async def nearby(
         request.app.state.service.nearby(
             address.strip(), market, count, within_km, (cuisine or "").strip() or None, parse_price(price),
             parse_min_rating(min_rating), sort, place_id or None, session or None, lat, lng,
+            (label or "").strip() or None,
         )
     )
     return respond(table, format, request)
