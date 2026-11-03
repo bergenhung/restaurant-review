@@ -51,6 +51,7 @@ button.secondary{background:transparent;color:var(--accent);border:1px solid var
 .formerr{color:#b91c1c;font-size:13px;grid-column:1/-1;margin:0}
 #map{height:380px;border-radius:12px;border:1px solid var(--line);margin:0 0 18px;background:var(--chip)}@media (max-width:640px){#map{height:280px}}
 .mapnote{color:var(--muted);font-size:13px;margin:0 0 16px}
+.summary{margin:6px 0;max-width:46ch;font-size:.92em;line-height:1.4}
 .wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:760px}
 th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:13px;color:var(--muted);font-weight:600}
 tr[data-idx]{cursor:pointer}tr.active td{background:var(--hl)}
@@ -561,8 +562,22 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
             else:
                 cells.append(f"<td>{escape(r.michelin) if r.michelin else '<span class=muted>–</span>'}</td>")
         rec = r.recent_3_months
-        recent = f"{_fmt(rec.average)}<div class='muted'>{rec.review_count} saved review{'s' if rec.review_count != 1 else ''}{' · low confidence' if rec.low_confidence else ''}</div>"
+        n = rec.review_count
+        if rec.average is None:
+            recent = (f"<span class='muted'>too few recent reviews</span><div class='muted'>{n} from the last "
+                      f"3 months seen so far</div>")
+        else:
+            recent = (f"{_fmt(rec.average)}<div class='muted'>{n} review{'s' if n != 1 else ''}"
+                      f"{' · low confidence' if rec.low_confidence else ''}</div>")
         dishes = "".join(f'<span class="chip">{escape(d)}</span>' for d in r.top_dishes) or '<span class="muted">not enough reviews yet</span>'
+        summary = ""
+        if r.review_summary:
+            rs = r.review_summary
+            # Google requires the "Summarized with Gemini" disclosure and a link to the reviews.
+            more = (f' · <a href="{escape(rs.reviews_url)}" target="_blank" rel="noopener">Google reviews'
+                    f'<span class="sr-only"> (opens in a new tab)</span> ↗</a>') if rs.reviews_url else ""
+            summary = (f'<div class="summary">{escape(rs.text)}<div class="muted">{escape(rs.disclosure)}{more}'
+                       f'</div></div>')
         price = " ".join(x for x in (r.price, f"({r.price_range} per person)" if r.price_range else None) if x)
         meta = " · ".join(x for x in (price, r.cuisine) if x)
         row_links = ([("Directions", r.directions_url)] if r.directions_url else []) + [(l.label, l.url) for l in r.links]
@@ -574,7 +589,7 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
         idx_attr = f' data-idx="{i}"' if r.lat is not None else ""
         body.append(
             f"<tr{idx_attr}><td><span class='rank'>{r.rank or i + 1}</span></td><td><strong>{escape(r.name)}</strong><div class='muted'>{escape(r.address)}</div>"
-            f"<div class='muted'>{escape(meta)}</div>{_hours_html(r)}{extra}</td>{_distance_cell(r.distance_km) if nearby else ''}"
+            f"<div class='muted'>{escape(meta)}</div>{_hours_html(r)}{summary}{extra}</td>{_distance_cell(r.distance_km) if nearby else ''}"
             f"<td><strong>{_fmt(r.all_time_rating, 2)}</strong></td>"
             f"{''.join(cells)}<td>{recent}</td><td>{dishes}</td></tr>"
         )

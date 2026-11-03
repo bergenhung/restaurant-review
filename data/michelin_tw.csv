@@ -1,1 +1,435 @@
-name,name_zh,city,distinction,year
+name,name_zh,city,distinction,year,lat,lng,url
+Cat House,,Hsinchu City,Bib Gourmand,,24.7957336,120.9712507,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/cat-house
+Chang Chang Kitchen,,Hsinchu City,Selected,,24.8181812,120.9720477,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/chang-chang-kitchen
+Dongmen Rice Noodle Soup,,Hsinchu City,Bib Gourmand,,24.8051475,120.9688171,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/dongmen-rice-noodle-soup
+Garden.V,,Hsinchu City,Bib Gourmand,,24.8085317,120.9721129,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/garden-v
+Hai Kou Guabao,,Hsinchu City,Selected,,24.8210232,120.9270582,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/hai-kou-guabao
+He Jih Hsiang (Minzu Road),,Hsinchu City,Bib Gourmand,,24.809133,120.9789429,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/he-jih-hsiang-minzu-road
+Ho Chu Yuan,,Hsinchu City,Selected,,24.8205368,120.9656405,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/ho-chu-yuan
+Jiu Tian Fu,,Hsinchu City,Bib Gourmand,,24.8037919,120.9643124,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/jiu-tian-fu
+Jun,,Hsinchu City,Selected,,24.8140935,120.9818276,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/jun
+Kao Jai,,Hsinchu City,Selected,,24.8090945,120.9696718,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/kao-jai
+Lao Chen Chia,,Hsinchu City,Selected,,24.8035685,120.9663897,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/lao-chen-chia
+Lao Dian Ginger Chicken (North),,Hsinchu City,Selected,,24.8061919,120.9590096,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/lao-dian-ginger-chicken-north
+Miao Kou Ya Xiang Fan (Zhongshan Road),,Hsinchu City,Selected,,24.8042794,120.9645941,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/miao-kou-ya-xiang-fan-zhongshan-road
+Mo Chien Tan,,Hsinchu City,Selected,,24.811289,120.976784,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/mo-chien-tan
+Mu Fan Bloom,,Hsinchu City,Selected,,24.802042,120.998172,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/mu-fan-bloom
+No.10 Nanmen,,Hsinchu City,Selected,,24.8002263,120.9679355,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/no-10-nanmen
+Nung Wei Hsiao Chu,,Hsinchu City,Bib Gourmand,,24.7977542,120.9512965,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/nung-wei-hsiao-chu
+Shih Fang Hsiao Ching,,Hsinchu City,Selected,,24.80269,120.9646647,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/shih-fang-hsiao-ching
+TAIVII,,Hsinchu City,Selected,,24.8043753,120.973928,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/taivii
+Tang Ming,,Hsinchu City,Selected,,24.797827,120.96378,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/tang-ming
+Very Good Vegan Gua Bao,,Hsinchu City,Selected,,24.8003515,120.9659637,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/very-good-vegan-gua-bao
+Yeh Shu,,Hsinchu City,Selected,,24.8006603,120.9865851,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/yeh-shu
+Yi Hsuan,,Hsinchu City,Selected,,24.7770831,120.9675959,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/yi-hsuan
+Ying Wang Meatball,,Hsinchu City,Selected,,24.8085361,120.9337449,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/ying-wang-meatball
+Yuan Wei Duck Noodle,,Hsinchu City,Bib Gourmand,,24.8007492,120.9683298,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/yuan-wei-duck-noodle
+Yummy,,Hsinchu City,Selected,,24.8072188,120.9780111,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/yummy
+min food,,Hsinchu City,Selected,,24.8096188,120.9735203,https://guide.michelin.com/en/northern-taiwan/hsinchu-city_2853126/restaurant/min-food
+Ang Gu,,Hsinchu County,Bib Gourmand,,24.792825,121.1774279,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/ang-gu
+Bebu,,Hsinchu County,Bib Gourmand,,24.6987091,121.0582157,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/bebu
+Chuan Fu,,Hsinchu County,Selected,,24.8297437,121.0184005,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/chuan-fu-1217253
+Firoo,,Hsinchu County,Selected,,24.8249315,121.0258984,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/firoo
+Geng Ye Yue Mei,,Hsinchu County,Selected,,24.6671165,121.0180537,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/geng-ye-yue-mei
+HOYA,,Hsinchu County,Selected,,24.811848,121.024926,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/hoya-1244989
+Happy Hwa,,Hsinchu County,Selected,,24.8165389,121.0267108,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/happy-hwa
+Home Dishes,,Hsinchu County,Selected,,24.809847,121.029373,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/home-dishes
+Hung Chin,,Hsinchu County,Bib Gourmand,,24.7598972,121.0361344,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/hung-chin
+Ko Chia Pen Se,,Hsinchu County,Selected,,24.7011499,121.05341,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/ko-chia-pen-se
+Lao Tou Pai,,Hsinchu County,Selected,,24.6840319,121.0540024,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/lao-tou-pai
+Li Yueh,,Hsinchu County,Selected,,24.8312271,121.0077241,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/li-yueh
+Monsoon,,Hsinchu County,Bib Gourmand,,24.820645,121.02315,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/monsoon-1245161
+Mud Brick House,,Hsinchu County,Selected,,24.7050367,121.0547257,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/mud-brick-house
+Noon Turnip Cake,,Hsinchu County,Bib Gourmand,,24.7166764,121.1403927,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/noon-turnip-cake
+Pho Xŭ,,Hsinchu County,Selected,,24.8253809,121.0245259,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/pho-xu
+Piccola Enoteca,,Hsinchu County,Selected,,24.8194817,121.0245486,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/piccola-enoteca
+SABI,,Hsinchu County,Selected,,24.8152385,121.0222717,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/sabi
+Shan Guo Tang,,Hsinchu County,Bib Gourmand,,24.8156887,121.0192843,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/shan-guo-tang
+Shou Wu EAT,,Hsinchu County,Bib Gourmand,,24.8201983,121.0232977,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/shou-wu-eat
+Sushi An,,Hsinchu County,1 Star,,24.810849,121.034005,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/sushi-an
+Tang Tsao Yuan,,Hsinchu County,Bib Gourmand,,24.8202165,121.0093945,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/tang-tsao-yuan
+Tsou Chi Cai Bao (Zhongzheng Road),,Hsinchu County,Bib Gourmand,,24.7006207,121.0559834,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/tsou-chi-cai-bao-zhongzheng-road
+Wan Wan,,Hsinchu County,Selected,,24.8984929,120.9801545,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/wan-wan-1244990
+Yi Ge Rice Vermicelli,,Hsinchu County,Bib Gourmand,,24.7551364,121.0954439,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/yi-ge-rice-vermicelli
+ZenA,,Hsinchu County,Selected,,24.8093066,121.0242066,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/zena
+Zhudong Fried Sparerib Noodle (Zhudong),,Hsinchu County,Selected,,24.7381148,121.0941915,https://guide.michelin.com/en/northern-taiwan/hsinchu-county_2853127/restaurant/zhudong-fried-sparerib-noodle-zhudong
+A Fung's Harmony Cuisine,,Kaohsiung,Selected,,22.6280689,120.3196909,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/a-fung-s-harmony-cuisine
+Anchovy,,Kaohsiung,Selected,,22.6128948,120.3084631,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/anchovy
+Apis Grill,,Kaohsiung,Selected,,22.6395983,120.3488072,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/apis-grill
+Bei Gang Tsai Rice Tube (Yancheng),,Kaohsiung,Bib Gourmand,,22.6317141,120.2851452,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/bei-gang-tsai-rice-tube-yancheng
+Bo Home,,Kaohsiung,Selected,,22.6219103,120.3082843,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/bo-home
+CRATAIN,,Kaohsiung,Selected,,22.66398,120.29867,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/cratain
+Caizong Li,,Kaohsiung,Bib Gourmand,,22.615945,120.296825,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/caizong-li
+Chang Sheng 29,,Kaohsiung,Selected,,22.621486,120.2897959,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/chang-sheng-29
+Chao Ming,,Kaohsiung,Bib Gourmand,,22.6305849,120.2931516,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/chao-ming
+Cheng Tsung Duck Rice,,Kaohsiung,Selected,,22.6646256,120.3094563,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/cheng-tsung-duck-rice
+Cheng's Noodles,,Kaohsiung,Selected,,22.625,120.28273,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/cheng-s-noodles
+Cho,,Kaohsiung,Selected,,22.6397001,120.3202191,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/cho
+Chun Lan Gua Bao,,Kaohsiung,Bib Gourmand,,22.6279509,120.3076787,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/chun-lan-gua-bao
+Cianjin Braised Pork Rice,,Kaohsiung,Bib Gourmand,,22.6272171,120.2954397,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/cianjin-brasied-pork-rice
+Ciao Zai Tou Huang's Braised Pork Rice (Ciaotou),,Kaohsiung,Bib Gourmand,,22.7547237,120.3122203,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/ciao-zai-tou-huang-s-braised-pork-rice-ciaotou
+Crab's House,,Kaohsiung,Selected,,22.6277122,120.3118177,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/crab-s-house
+Erge Shih Tang,,Kaohsiung,Bib Gourmand,,22.6511882,120.2883164,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/erge-shih-tang
+GEN,,Kaohsiung,1 Star,,22.6042,120.29872,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/gen-1214088
+Good Crab House,,Kaohsiung,Selected,,22.64873,120.32092,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/good-crab-house
+HAILI,,Kaohsiung,1 Star,,22.6291861,120.2916502,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/haili
+Hou Chi Duck Rice,,Kaohsiung,Bib Gourmand,,22.6347508,120.2915436,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/hou-chi-duck-rice
+Hsiu Ming,,Kaohsiung,Bib Gourmand,,22.88557,120.481423,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/hsiu-ming
+Hu Dong Beef,,Kaohsiung,Bib Gourmand,,22.8777542,120.2519723,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/hu-dong-beef
+Hung Chi Rice Shop,,Kaohsiung,Bib Gourmand,,22.6646279,120.3042735,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/hung-chi-rice-shop
+Hābu,,Kaohsiung,1 Star,,22.6024486,120.3037075,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/habu
+Ibu Kitchen,,Kaohsiung,Bib Gourmand,,22.8937396,120.5142027,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/ibu-kitchen
+J Parc,,Kaohsiung,Selected,,22.6466668,120.2905605,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/j-parc
+Joes (Gangshan),,Kaohsiung,Bib Gourmand,,22.7985835,120.2841362,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/joes-gangshan
+Jui Cuisine,,Kaohsiung,Selected,,22.623766,120.285331,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/jui-cuisine
+Kuca Seafood,,Kaohsiung,Selected,,22.6622365,120.3063119,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/kuca-seafood
+Li.nu,,Kaohsiung,Selected,,22.6061256,120.3051595,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/li-nu
+Liang Chia Pig Knuckle,,Kaohsiung,Bib Gourmand,,22.64191,120.34179,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/liang-chia-pig-knuckle
+Liao Chi Migao,,Kaohsiung,Bib Gourmand,,22.7543187,120.3123362,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/liao-chi-migao
+MU,,Kaohsiung,Selected,,22.6293776,120.3094313,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/mu-1204166
+Mai Yen Shun,,Kaohsiung,Selected,,22.6512679,120.2869283,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/mai-yen-shun
+Mei Liang Jia,,Kaohsiung,Selected,,22.6437072,120.3051999,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/mei-liang-jia
+Mi Yuan Tzu Steamed Glutinous Rice,,Kaohsiung,Bib Gourmand,,22.6283345,120.3105784,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/mi-yuan-tzu-steamed-glutinous-rice
+NIU LAO DA (Zihciang 2nd Road),,Kaohsiung,Bib Gourmand,,22.6224341,120.2966045,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/niu-lao-da
+Nibbon,,Kaohsiung,1 Star,,22.6497185,120.2843239,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/nibbon
+Old New Taiwanese Cuisine (Jiuru 2nd Road),,Kaohsiung,Selected,,22.640741,120.3074876,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/old-new-taiwanese-cuisine-jiuru-2nd-road
+Paul's Canteen,,Kaohsiung,Selected,,22.6197004,120.3080244,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/paul-s-canteen
+Sho,,Kaohsiung,1 Star,,22.6060838,120.3054316,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/sho
+Simmer House,,Kaohsiung,Bib Gourmand,,22.6154819,120.3169166,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/simmer-house
+Sushi Mikoshi,,Kaohsiung,Selected,,22.643234,120.350526,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/sushi-mikoshi
+Syan Syang,,Kaohsiung,Selected,,23.0815488,120.5878598,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/syan-syang
+Temperature Studio,,Kaohsiung,Selected,,22.7995122,120.292222,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/temperature-studio
+Thai Yuan,,Kaohsiung,Bib Gourmand,,22.6179712,120.3014009,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/thai-yuan
+The Borage,,Kaohsiung,Selected,,22.624899,120.282409,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/the-borage
+Thomas Chien,,Kaohsiung,Selected,,22.6043997,120.3008295,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/thomas-chien
+Three Meals (Lingya),,Kaohsiung,Selected,,22.6201445,120.3034376,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/three-meals
+Three Wheels,,Kaohsiung,Selected,,22.6396024,120.35531,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/three-wheels
+Tien Shan (Sinsing),,Kaohsiung,Selected,,22.634542,120.309179,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/tien-shan-sinsing
+Xiantaosu,,Kaohsiung,Selected,,22.66201,120.306679,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/xiantaosu
+Yang Bao Bao (Chaoming Road),,Kaohsiung,Bib Gourmand,,22.7241743,120.3279485,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/yang-bao-bao-nanzih
+Yung Yen,,Kaohsiung,Bib Gourmand,,22.6330384,120.2904561,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/yung-yen
+the FRONT HOUSE,,Kaohsiung,1 Star,,22.6361761,120.3235831,https://guide.michelin.com/en/kaohsiung-region/kaohsiung/restaurant/the-front-house
+A Gan Yi Taro Balls,,New Taipei,Selected,,25.1076649,121.8436548,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/a-gan-yi-taro-balls
+A-ba's Taro Ball,,New Taipei,Bib Gourmand,,25.0076592,121.5123326,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/a-ba-s-taro-ball
+Abba Hakka,,New Taipei,Bib Gourmand,,24.9360835,121.365832,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/abba-hakka
+Amajia,,New Taipei,Selected,,25.2272451,121.6455696,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/amajia
+Bak Kut Pan,,New Taipei,Selected,,24.981977,121.542106,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/bak-kut-pan
+Bei Ya Duck Thick Soup,,New Taipei,Bib Gourmand,,24.962658,121.539642,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/bei-ya-duck-thick-soup
+Bitan Chiao Tou Goose,,New Taipei,Bib Gourmand,,24.962741,121.5393181,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/bitan-chiao-tou-goose
+Chi Yuan,,New Taipei,Selected,,24.9892273,121.8873215,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/chi-yuan
+Chia I,,New Taipei,Selected,,25.048599,121.923506,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/chia-i
+Chin Ta Lu Rou Fan,,New Taipei,Selected,,25.0644315,121.491641,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/chin-ta-lu-rou-fan
+Chun Yu Garden,,New Taipei,Selected,,25.1926182,121.4900262,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/chun-yu-garden
+Da One Gone Lamb,,New Taipei,Bib Gourmand,,25.0247738,121.4657355,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/da-one-gone-lamb
+Dark Palace Taiwanese Gourmet,,New Taipei,Selected,,25.17723,121.425816,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/dark-palace-taiwanese-gourmet
+Dian Xiao Er (Datong North Road),,New Taipei,Bib Gourmand,,25.0626666,121.4954962,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/dian-xiao-er-datong-north-road
+Garden h,,New Taipei,Bib Gourmand,,24.9992328,121.5180667,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/garden-h
+Guang Xing Pork Knuckle,,New Taipei,Bib Gourmand,,25.074733,121.49491,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/guang-xing-pork-knuckle
+Hai Shan,,New Taipei,Selected,,25.0097902,121.4669782,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/hai-shan
+Happy Garden,,New Taipei,Selected,,25.126647,121.406703,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/happy-garden
+Huí Huí,,New Taipei,Selected,,25.1217115,121.8614966,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/hui-hui
+JIA YEN,,New Taipei,Selected,,25.0117506,121.462726,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/jia-yen
+Jhen Pin,,New Taipei,Bib Gourmand,,25.0429405,121.4489115,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/jhen-pin
+Joy Vegetarian Restaurant,,New Taipei,Selected,,25.0716782,121.6308331,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/joy-vegetarian-restaurant
+Lai Kang Shan,,New Taipei,Bib Gourmand,,24.973543,121.54007,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/lai-kang-shan
+Lao Hsu,,New Taipei,Selected,,24.8991762,121.5522613,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/lao-hsu
+Le Mei Studio,,New Taipei,Selected,,24.9580059,121.538893,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/le-mei-studio
+Le Yeh,,New Taipei,Selected,,24.9426312,121.7162669,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/le-yeh
+NATURAL TEA MANOR,,New Taipei,Selected,,25.0331317,121.6388119,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/natural-tea-manor
+Na Ka Seafood,,New Taipei,Selected,,25.0725299,121.3668082,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/na-ka-seafood
+San Chieh Mei Nung Chia Le,,New Taipei,Bib Gourmand,,25.1678181,121.6339232,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/san-chieh-mei-nung-chia-le
+San Fen Su Chi,,New Taipei,Selected,,25.0079536,121.5190407,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/san-fen-su-chi
+San Tung,,New Taipei,Bib Gourmand,,24.9735212,121.5313767,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/san-tung
+Shang Hao,,New Taipei,Bib Gourmand,,25.0049658,121.47488,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/shang-hao
+Shi Yang,,New Taipei,Selected,,25.1279183,121.6257041,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/shi-yang
+Shou Wu,,New Taipei,Selected,,25.0098094,121.4620257,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/shou-wu
+Superman,,New Taipei,Bib Gourmand,,24.9692106,121.5417608,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/superman
+SÒNG JHAO,,New Taipei,Bib Gourmand,,25.0134158,121.5171435,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/song-jhao
+Tsai Chia Beef Noodles,,New Taipei,Bib Gourmand,,24.9915693,121.5255821,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/tsai-chia-beef-noodles
+Wonderful Baba Bak Kut Teh King Of King,,New Taipei,Selected,,25.0246711,121.469871,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/wonderful-baba-bak-kut-teh-king-of-king
+Woogu House,,New Taipei,Selected,,25.17954,121.44294,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/woogu-house
+Xun Kitchen,,New Taipei,Selected,,25.0761095,121.3796675,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/xun-kitchen
+Yeh Chia Pork Ribs Medicinal Herbs Soup,,New Taipei,Bib Gourmand,,25.0202281,121.4813581,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/yeh-chia-pork-ribs-medicinal-herbs-soup
+Yonghe Chia Hsiang Soy Milk,,New Taipei,Bib Gourmand,,24.99776,121.51877,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/yonghe-chia-hsiang-soy-milk
+Zhang Ji Fish Ball,,New Taipei,Selected,,25.1091818,121.8456334,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/zhang-ji-fish-ball
+Zhulin Chicken (Yonghe),,New Taipei,Selected,,25.146505,121.5185006,https://guide.michelin.com/en/northern-taiwan/new-taipei-city_2853082/restaurant/zhulin-chicken-yonghe
+A Kun Mian,,Taichung,Bib Gourmand,,24.143,120.68242,https://guide.michelin.com/en/taichung-region/taichung/restaurant/a-kun-mian
+Ajisai,,Taichung,Bib Gourmand,,24.1486888,120.6635005,https://guide.michelin.com/en/taichung-region/taichung/restaurant/ajisai
+Chef Ah-Hsi's Old Time Restaurant,,Taichung,Selected,,24.1847432,120.6649726,https://guide.michelin.com/en/taichung-region/taichung/restaurant/chef-ah-hsi-s-old-time-restaurant
+Chien Wei Seafood,,Taichung,Selected,,24.132334,120.6441356,https://guide.michelin.com/en/taichung-region/taichung/restaurant/chien-wei-seafood
+Chin Chih Yuan (Central),,Taichung,Bib Gourmand,,24.14131,120.6825015,https://guide.michelin.com/en/taichung-region/taichung/restaurant/chin-chih-yuan
+Don Moo,,Taichung,Bib Gourmand,,24.1555746,120.6699952,https://guide.michelin.com/en/taichung-region/taichung/restaurant/don-moo
+Dongyin Fisherman,,Taichung,Selected,,24.1468092,120.6639354,https://guide.michelin.com/en/taichung-region/taichung/restaurant/dongyin-fisherman
+FIRNS,,Taichung,Selected,,24.1565402,120.6561637,https://guide.michelin.com/en/taichung-region/taichung/restaurant/firns
+Feng Chi Goose,,Taichung,Bib Gourmand,,24.2097324,120.5691427,https://guide.michelin.com/en/taichung-region/taichung/restaurant/feng-chi-goose
+Fleur de Sel,,Taichung,Selected,,24.160425,120.634515,https://guide.michelin.com/en/taichung-region/taichung/restaurant/fleur-de-sel-1188695
+Forchetta,,Taichung,Selected,,24.16003,120.64085,https://guide.michelin.com/en/taichung-region/taichung/restaurant/forchetta
+Fu Din Wang (Central),,Taichung,Bib Gourmand,,24.1451927,120.6765412,https://guide.michelin.com/en/taichung-region/taichung/restaurant/fu-din-wang-central
+Fu Juang Yuan,,Taichung,Bib Gourmand,,24.1498664,120.6619496,https://guide.michelin.com/en/taichung-region/taichung/restaurant/fu-juang-yuan
+Fu Kuei Ting,,Taichung,Bib Gourmand,,24.1401586,120.6782384,https://guide.michelin.com/en/taichung-region/taichung/restaurant/fu-kuei-ting
+Hibiki Seafood,,Taichung,Selected,,24.1650182,120.6344358,https://guide.michelin.com/en/taichung-region/taichung/restaurant/hibiki-seafood
+House of Dawn,,Taichung,Bib Gourmand,,24.1574877,120.6488948,https://guide.michelin.com/en/taichung-region/taichung/restaurant/house-of-dawn
+Hui Chung,,Taichung,Selected,,24.176266,120.624289,https://guide.michelin.com/en/taichung-region/taichung/restaurant/hui-chung
+Inflorescence,,Taichung,Selected,,24.2092675,120.7851268,https://guide.michelin.com/en/taichung-region/taichung/restaurant/inflorescence
+Isagi,,Taichung,Selected,,24.14109,120.66031,https://guide.michelin.com/en/taichung-region/taichung/restaurant/isagi
+JL STUDIO,,Taichung,3 Stars,,24.1411392,120.6589807,https://guide.michelin.com/en/taichung-region/taichung/restaurant/jl-studio
+Ji Zai Ten,,Taichung,Selected,,24.124358,120.664427,https://guide.michelin.com/en/taichung-region/taichung/restaurant/ji-zai-ten
+KR Prime Steak,,Taichung,Selected,,24.160989,120.641871,https://guide.michelin.com/en/taichung-region/taichung/restaurant/kr-prime-steak
+Ke Kou Beef Noodles,,Taichung,Bib Gourmand,,24.1569617,120.6504773,https://guide.michelin.com/en/taichung-region/taichung/restaurant/ke-kou-beef-noodles
+Kung Fu Shanghai Fish Ball,,Taichung,Bib Gourmand,,24.1519459,120.6602683,https://guide.michelin.com/en/taichung-region/taichung/restaurant/kung-fu-shanghai-fish-ball
+Küisine (West),,Taichung,Bib Gourmand,,24.1487311,120.6668283,https://guide.michelin.com/en/taichung-region/taichung/restaurant/kuisine
+L'Atelier par Yao,,Taichung,1 Star,,24.1528622,120.7051419,https://guide.michelin.com/en/taichung-region/taichung/restaurant/l-atelier-par-yao
+Lao Shih Kuan Noodles,,Taichung,Bib Gourmand,,24.2683251,120.5720504,https://guide.michelin.com/en/taichung-region/taichung/restaurant/lao-shih-kuan-noodles
+Le Plein,,Taichung,Selected,,24.1409408,120.6597656,https://guide.michelin.com/en/taichung-region/taichung/restaurant/le-plein
+Li Xiao Lou,,Taichung,Bib Gourmand,,24.1766503,120.6425912,https://guide.michelin.com/en/taichung-region/taichung/restaurant/li-xiao-lou
+Lou's (Nantun),,Taichung,Bib Gourmand,,24.1462415,120.6347791,https://guide.michelin.com/en/taichung-region/taichung/restaurant/lou-s-nantun
+Master of Mushroom (Xinshe),,Taichung,Selected,,24.2007861,120.7992768,https://guide.michelin.com/en/taichung-region/taichung/restaurant/master-of-mushroom
+Meidz Seafood,,Taichung,Selected,,24.24439,120.56179,https://guide.michelin.com/en/taichung-region/taichung/restaurant/meidz-seafood
+Ming Juan Lou,,Taichung,Selected,,24.1524,120.66388,https://guide.michelin.com/en/taichung-region/taichung/restaurant/ming-juan-lou
+Moment in Beijing,,Taichung,Selected,,24.135059,120.663236,https://guide.michelin.com/en/taichung-region/taichung/restaurant/moment-in-beijing
+Moon Pavilion,,Taichung,Bib Gourmand,,24.1378627,120.6834946,https://guide.michelin.com/en/taichung-region/taichung/restaurant/moon-pavilion
+Munchi,,Taichung,Selected,,24.1538913,120.6596754,https://guide.michelin.com/en/taichung-region/taichung/restaurant/munchi
+NIKU RYOURI FUKU,,Taichung,Selected,,24.147723,120.662757,https://guide.michelin.com/en/taichung-region/taichung/restaurant/niku-ryouri-fuku
+Night School Braised Pork Rice,,Taichung,Bib Gourmand,,24.1504785,120.6552633,https://guide.michelin.com/en/taichung-region/taichung/restaurant/night-school-braised-pork-rice
+Niou Jia Juang,,Taichung,Bib Gourmand,,24.2628521,120.824839,https://guide.michelin.com/en/taichung-region/taichung/restaurant/niou-jia-juang
+No Name Noodles,,Taichung,Bib Gourmand,,24.13963,120.68006,https://guide.michelin.com/en/taichung-region/taichung/restaurant/no-name-noodles
+Oretachi No Nikuya,,Taichung,1 Star,,24.1509806,120.6564165,https://guide.michelin.com/en/taichung-region/taichung/restaurant/oretachi-no-nikuya-1195583
+Orient Dragon,,Taichung,Selected,,24.150829,120.6429518,https://guide.michelin.com/en/taichung-region/taichung/restaurant/orient-dragon
+Peng Cheng Tang,,Taichung,Bib Gourmand,,24.1449224,120.7137408,https://guide.michelin.com/en/taichung-region/taichung/restaurant/peng-cheng-tang
+Rong Cuisine,,Taichung,Selected,,24.1357195,120.6837919,https://guide.michelin.com/en/taichung-region/taichung/restaurant/rong-cuisine
+SHINEYU,,Taichung,1 Star,,24.1571646,120.6386801,https://guide.michelin.com/en/taichung-region/taichung/restaurant/shineyu
+Saka,,Taichung,Selected,,24.204956,120.6441243,https://guide.michelin.com/en/taichung-region/taichung/restaurant/saka
+Shanghai Food (Nantun),,Taichung,Bib Gourmand,,24.142718,120.6373369,https://guide.michelin.com/en/taichung-region/taichung/restaurant/shanghai-food
+Shin Yuan (West),,Taichung,Bib Gourmand,,24.148365,120.668302,https://guide.michelin.com/en/taichung-region/taichung/restaurant/shin-yuan
+Shoal Cuisine,,Taichung,Selected,,24.161627,120.6779774,https://guide.michelin.com/en/taichung-region/taichung/restaurant/shoal-cuisine
+Sur-,,Taichung,1 Star,,24.1379723,120.6836711,https://guide.michelin.com/en/taichung-region/taichung/restaurant/sur
+Sushi Noru,,Taichung,Selected,,24.150028,120.647603,https://guide.michelin.com/en/taichung-region/taichung/restaurant/sushi-noru
+Taichung Meatball,,Taichung,Bib Gourmand,,24.1343963,120.6827409,https://guide.michelin.com/en/taichung-region/taichung/restaurant/taichung-meatball
+Torien Yakitori,,Taichung,Selected,,24.1554371,120.6583189,https://guide.michelin.com/en/taichung-region/taichung/restaurant/yakitori-wine
+Tu Pang,,Taichung,Selected,,24.135554,120.6839438,https://guide.michelin.com/en/taichung-region/taichung/restaurant/tu-pang
+UNA-VERSE,,Taichung,Selected,,24.1402726,120.6483376,https://guide.michelin.com/en/taichung-region/taichung/restaurant/una-verse
+Wen Tao,,Taichung,Selected,,24.1654322,120.6915378,https://guide.michelin.com/en/taichung-region/taichung/restaurant/wen-tao
+YUENJI,,Taichung,1 Star,,24.1743625,120.6236048,https://guide.michelin.com/en/taichung-region/taichung/restaurant/yuen-ji
+Yuan,,Taichung,Selected,,24.1498848,120.6539851,https://guide.michelin.com/en/taichung-region/taichung/restaurant/yuan
+Yùn: La Cuisine,,Taichung,Selected,,24.19345,120.68522,https://guide.michelin.com/en/taichung-region/taichung/restaurant/yun-la-cuisine
+enPure,,Taichung,Selected,,24.1606258,120.687517,https://guide.michelin.com/en/taichung-region/taichung/restaurant/enpure
+huist,,Taichung,Selected,,24.1458273,120.6636401,https://guide.michelin.com/en/taichung-region/taichung/restaurant/huist
+meatGQ,,Taichung,Selected,,24.15085,120.62848,https://guide.michelin.com/en/taichung-region/taichung/restaurant/meatgq
+zài,,Taichung,Selected,,24.155657,120.656635,https://guide.michelin.com/en/taichung-region/taichung/restaurant/zai
+A Cun Beef Soup (Baoan Road),,Tainan,Selected,,22.9902147,120.1965793,https://guide.michelin.com/en/tainan-region/tainan/restaurant/a-cun-beef-soup-baoan-road
+A Hai Taiwanese Oden,,Tainan,Selected,,22.9761068,120.2113349,https://guide.michelin.com/en/tainan-region/tainan/restaurant/a-hai-tawianese-oden
+A Hsing Congee,,Tainan,Bib Gourmand,,23.0000632,120.1921938,https://guide.michelin.com/en/tainan-region/tainan/restaurant/a-hsing-congee
+A Ming Zhu Xing (Baoan Road),,Tainan,Selected,,22.9905684,120.196022,https://guide.michelin.com/en/tainan-region/tainan/restaurant/a-ming-zhu-xing-baoan-road
+A Wen Rice Cake,,Tainan,Bib Gourmand,,22.9908246,120.1943019,https://guide.michelin.com/en/tainan-region/tainan/restaurant/a-wen-rice-cake
+A Xing Shi Mu Yu,,Tainan,Bib Gourmand,,23.0065487,120.1934354,https://guide.michelin.com/en/tainan-region/tainan/restaurant/a-xing-shi-mu-yu
+A-Yu Beef Shabu Shabu,,Tainan,Selected,,22.9410754,120.2613675,https://guide.michelin.com/en/tainan-region/tainan/restaurant/a-yu-beef-shabu-shabu-kunlun-road
+Amei,,Tainan,Bib Gourmand,,22.9948568,120.2042929,https://guide.michelin.com/en/tainan-region/tainan/restaurant/amei
+BAA Wanli Goat,,Tainan,Bib Gourmand,,22.924374,120.184297,https://guide.michelin.com/en/tainan-region/tainan/restaurant/baa-wanli-goat
+Black-faced Spoonbill Canteen,,Tainan,Selected,,23.0828682,120.0629731,https://guide.michelin.com/en/tainan-region/tainan/restaurant/black-faced-spoonbill-canteen
+CHAN CHI,,Tainan,Bib Gourmand,,22.992275,120.2262,https://guide.michelin.com/en/tainan-region/tainan/restaurant/chan-chi
+Chang Ying Seafood House,,Tainan,Bib Gourmand,,23.2389728,120.1105684,https://guide.michelin.com/en/tainan-region/tainan/restaurant/chang-ying-seafood-house
+Cheng Shi,,Tainan,Bib Gourmand,,22.9894932,120.1981005,https://guide.michelin.com/en/tainan-region/tainan/restaurant/cheng-shi
+Chuan Chia Congee,,Tainan,Selected,,22.9969677,120.1761045,https://guide.michelin.com/en/tainan-region/tainan/restaurant/chuan-chia-congee
+Chuan Tai Hao Milkfish Ball,,Tainan,Selected,,22.9823995,120.2113436,https://guide.michelin.com/en/tainan-region/tainan/restaurant/chuan-tai-hao-milkfish-ball
+Dayong Street No Name Congee,,Tainan,Bib Gourmand,,22.9898212,120.1932798,https://guide.michelin.com/en/tainan-region/tainan/restaurant/dayong-street-no-name-congee
+Di Yi Ding,,Tainan,Selected,,22.9856881,120.2230358,https://guide.michelin.com/en/tainan-region/tainan/restaurant/di-yi-ding
+Eastern Castle Noodles,,Tainan,Selected,,22.9874208,120.2171727,https://guide.michelin.com/en/tainan-region/tainan/restaurant/eastern-castle-noodles
+Eat to Fat,,Tainan,Bib Gourmand,,22.9977563,120.2006862,https://guide.michelin.com/en/tainan-region/tainan/restaurant/eat-to-fat
+FUKAI,,Tainan,Selected,,22.9889104,120.23049,https://guide.michelin.com/en/tainan-region/tainan/restaurant/fukai
+Feng No Seafood,,Tainan,Selected,,23.2137062,120.1051764,https://guide.michelin.com/en/tainan-region/tainan/restaurant/feng-no-seafood
+Fu Tai Table Third Generation,,Tainan,Bib Gourmand,,22.995819,120.2050781,https://guide.michelin.com/en/tainan-region/tainan/restaurant/fu-tai-table-third-generation
+Good Hunan Cuisine,,Tainan,Selected,,22.98258,120.20469,https://guide.michelin.com/en/tainan-region/tainan/restaurant/good-hunan-cuisine
+Hao Nung Chia Migao,,Tainan,Bib Gourmand,,22.9816143,120.195999,https://guide.michelin.com/en/tainan-region/tainan/restaurant/hao-nung-chia-migao
+Hara Peko,,Tainan,Selected,,22.9936144,120.2004718,https://guide.michelin.com/en/tainan-region/tainan/restaurant/hara-peko
+Hsi Lo Tien Beef Soup,,Tainan,Bib Gourmand,,23.0015391,120.2073867,https://guide.michelin.com/en/tainan-region/tainan/restaurant/hsi-lo-tien-beef-soup
+Huang Chia Shrimp Roll,,Tainan,Bib Gourmand,,23.0028094,120.1925813,https://guide.michelin.com/en/tainan-region/tainan/restaurant/huang-chia-shrimp-roll
+Jai Mi Ba,,Tainan,Bib Gourmand,,22.9907395,120.1937314,https://guide.michelin.com/en/tainan-region/tainan/restaurant/jai-mi-ba
+Jyu Dim,,Tainan,Selected,,22.9927123,120.2285992,https://guide.michelin.com/en/tainan-region/tainan/restaurant/jyu-dim
+Kaiyuan Red-cook Spanish Mackerel,,Tainan,Bib Gourmand,,23.0081097,120.2213038,https://guide.michelin.com/en/tainan-region/tainan/restaurant/kaiyuan-red-cook-spanish-mackerel
+Kaiyuan Road No Name Milkfish,,Tainan,Selected,,23.0081863,120.2214199,https://guide.michelin.com/en/tainan-region/tainan/restaurant/kaiyuan-road-no-name-milkfish
+L'herbe,,Tainan,Selected,,22.9920563,120.1651081,https://guide.michelin.com/en/tainan-region/tainan/restaurant/l-herbe
+Liang Liang Table,,Tainan,Selected,,23.0047652,120.2013376,https://guide.michelin.com/en/tainan-region/tainan/restaurant/liang-liang-table
+Lien Wu Chiao Lamb Soup,,Tainan,Bib Gourmand,,23.0342946,120.3082851,https://guide.michelin.com/en/tainan-region/tainan/restaurant/lien-wu-chiao-lamb-soup
+Lo Cheng Migao,,Tainan,Bib Gourmand,,22.9959996,120.2045826,https://guide.michelin.com/en/tainan-region/tainan/restaurant/lo-cheng-migao
+Lumière,,Tainan,Selected,,23.3649411,120.3616331,https://guide.michelin.com/en/tainan-region/tainan/restaurant/lumiere-1245897
+Maan,,Tainan,Selected,,22.9982059,120.2011893,https://guide.michelin.com/en/tainan-region/tainan/restaurant/maan
+Mao Su,,Tainan,Selected,,22.9861941,120.2229702,https://guide.michelin.com/en/tainan-region/tainan/restaurant/mao-su
+Mayu Cocoon,,Tainan,Selected,,22.9920139,120.1925626,https://guide.michelin.com/en/tainan-region/tainan/restaurant/mayu-cocoon
+Musa,,Tainan,Selected,,22.990876,120.2030577,https://guide.michelin.com/en/tainan-region/tainan/restaurant/musa
+No Name Lamb Soup,,Tainan,Bib Gourmand,,22.99134,120.1945,https://guide.michelin.com/en/tainan-region/tainan/restaurant/no-name-lamb-soup
+Po Jen Tang,,Tainan,Bib Gourmand,,22.996686,120.2003768,https://guide.michelin.com/en/tainan-region/tainan/restaurant/po-jen-tang
+Principe,,Tainan,Selected,,22.9993779,120.210727,https://guide.michelin.com/en/tainan-region/tainan/restaurant/principe
+San Hao Yi Kung Tao Angelica Duck,,Tainan,Bib Gourmand,,22.9890547,120.2107938,https://guide.michelin.com/en/tainan-region/tainan/restaurant/san-hao-yi-kung-tao-angelica-duck
+Shang Hao Chih Beef Soup,,Tainan,Bib Gourmand,,23.0151705,120.2126499,https://guide.michelin.com/en/tainan-region/tainan/restaurant/shang-hao-chih-beef-soup
+Shian Jeng Shrimp Bawan,,Tainan,Bib Gourmand,,22.9887025,120.2351537,https://guide.michelin.com/en/tainan-region/tainan/restaurant/shian-jeng-shrimp-bawan
+Shun Te Beef Soup,,Tainan,Selected,,23.2317947,120.1805228,https://guide.michelin.com/en/tainan-region/tainan/restaurant/shun-te-beef-soup
+Small Park Danzai Noodles,,Tainan,Bib Gourmand,,22.9971812,120.1996507,https://guide.michelin.com/en/tainan-region/tainan/restaurant/small-park-danzai-noodles
+The Temple-front Eatery,,Tainan,Selected,,22.9923374,120.1985955,https://guide.michelin.com/en/tainan-region/tainan/restaurant/the-temple-front-eatery
+Tucheng Seafood,,Tainan,Selected,,23.0612092,120.1309059,https://guide.michelin.com/en/tainan-region/tainan/restaurant/tucheng-seafood
+Wang Jia Smoked Lamb,,Tainan,Selected,,22.9588834,120.3692938,https://guide.michelin.com/en/tainan-region/tainan/restaurant/wang-jia-smoked-lamb
+Wenpapa Goose,,Tainan,Selected,,23.0045972,120.2051406,https://guide.michelin.com/en/tainan-region/tainan/restaurant/wenpapa-goose
+Xie Shopkeeper,,Tainan,Bib Gourmand,,22.99922,120.16172,https://guide.michelin.com/en/tainan-region/tainan/restaurant/xie-shopkeeper
+Yang Mei Tu Chi,,Tainan,Selected,,23.1752354,120.4979801,https://guide.michelin.com/en/tainan-region/tainan/restaurant/yang-mei-tu-chi
+Yeh Jia Calamari Rice Noodle Soup,,Tainan,Bib Gourmand,,22.9911454,120.1969878,https://guide.michelin.com/en/tainan-region/tainan/restaurant/yeh-jia-calamari-rice-noodle-soup
+Yeh San Duck Thick Soup,,Tainan,Bib Gourmand,,22.9905363,120.224506,https://guide.michelin.com/en/tainan-region/tainan/restaurant/yeh-san-duck-thick-soup
+Yi Wei Pin,,Tainan,Bib Gourmand,,22.9975682,120.1988805,https://guide.michelin.com/en/tainan-region/tainan/restaurant/yi-wei-pin
+Yu Dao,,Tainan,1 Star,,22.976823,120.160965,https://guide.michelin.com/en/tainan-region/tainan/restaurant/yu-dao
+Yuan Zai Hui (Guohua Street),,Tainan,Bib Gourmand,,22.990514,120.1966836,https://guide.michelin.com/en/tainan-region/tainan/restaurant/yuan-zai-hui-guohua-street
+Zhu Xin Ju,,Tainan,Selected,,23.0003366,120.1950406,https://guide.michelin.com/en/tainan-region/tainan/restaurant/zhu-xin-ju
+Zhu-Ji Dong Tsai Ya,,Tainan,Bib Gourmand,,22.993531,120.20638,https://guide.michelin.com/en/tainan-region/tainan/restaurant/zhu-ji-dong-tsai-ya
+3927,,Taipei,Selected,,25.0422466,121.5479555,https://guide.michelin.com/en/taipei-region/taipei/restaurant/3927
+85TD,,Taipei,Selected,,25.0339324,121.5644667,https://guide.michelin.com/en/taipei-region/taipei/restaurant/85td
+A,,Taipei,2 Stars,,25.0414321,121.5426954,https://guide.michelin.com/en/taipei-region/taipei/restaurant/a
+A Cheng Goose (Zhongshan),,Taipei,Selected,,25.0566822,121.5300706,https://guide.michelin.com/en/taipei-region/taipei/restaurant/a-cheng-goose-zhongshan
+A Cut,,Taipei,1 Star,,25.0530031,121.5427565,https://guide.michelin.com/en/taipei-region/taipei/restaurant/a-cut
+Ad Astra,,Taipei,1 Star,,25.0544699,121.5241219,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ad-astra-1206669
+Aleisha,,Taipei,Selected,,25.0427734,121.540615,https://guide.michelin.com/en/taipei-region/taipei/restaurant/aleisha
+Antico Forno,,Taipei,Selected,,25.0267194,121.5397453,https://guide.michelin.com/en/taipei-region/taipei/restaurant/antico-forno
+Baho (Da'an),,Taipei,Selected,,25.0342117,121.5519352,https://guide.michelin.com/en/taipei-region/taipei/restaurant/baho
+Ban Bo,,Taipei,1 Star,,25.0813272,121.5605264,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ban-bo
+Bencotto,,Taipei,Selected,,25.055801,121.548349,https://guide.michelin.com/en/taipei-region/taipei/restaurant/bencotto
+Brisé,,Taipei,Selected,,25.049936,121.53554,https://guide.michelin.com/en/taipei-region/taipei/restaurant/brise
+CEO 1950,,Taipei,Selected,,25.0656859,121.5265823,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ceo-1950
+Chaud Doux,,Taipei,Selected,,25.058668,121.545564,https://guide.michelin.com/en/taipei-region/taipei/restaurant/chaud-doux
+Cheng Jia,,Taipei,Selected,,25.0610613,121.5316422,https://guide.michelin.com/en/taipei-region/taipei/restaurant/cheng-jia
+Chi Chia Chuang (Changchun Road),,Taipei,Bib Gourmand,,25.055052,121.526092,https://guide.michelin.com/en/taipei-region/taipei/restaurant/chi-chia-chuang-changchun-road
+Chinese Cuisine,,Taipei,Selected,,25.1376962,121.5150766,https://guide.michelin.com/en/taipei-region/taipei/restaurant/chinese-cuisine
+Ching Jiao,,Taipei,Bib Gourmand,,25.041449,121.527123,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ching-jiao
+Chuan Mu Yuan,,Taipei,Selected,,25.0588662,121.5179744,https://guide.michelin.com/en/taipei-region/taipei/restaurant/chuan-mu-yuan
+Chuan Ya,,Taipei,1 Star,,25.0350743,121.5672136,https://guide.michelin.com/en/taipei-region/taipei/restaurant/chuan-ya
+Chung Chia Sheng Jian Bao,,Taipei,Bib Gourmand,,25.0896291,121.5263441,https://guide.michelin.com/en/taipei-region/taipei/restaurant/chung-chia-sheng-jian-bao
+Circum-,,Taipei,1 Star,,24.98707,121.42931,https://guide.michelin.com/en/taipei-region/taipei/restaurant/circum
+Clavius,,Taipei,Bib Gourmand,,25.0597586,121.5531641,https://guide.michelin.com/en/taipei-region/taipei/restaurant/clavius
+Clover,,Taipei,Selected,,25.0395299,121.5674925,https://guide.michelin.com/en/taipei-region/taipei/restaurant/clover
+Da-Qiao-Tou Tube Rice Pudding (Yanping North Road),,Taipei,Bib Gourmand,,25.0649859,121.5111851,https://guide.michelin.com/en/taipei-region/taipei/restaurant/da-qiao-tou-tube-rice-pudding
+Danny's Steakhouse,,Taipei,Selected,,25.0824839,121.552909,https://guide.michelin.com/en/taipei-region/taipei/restaurant/danny-s-steakhouse
+Dasuke,,Taipei,Selected,,25.0257123,121.5479511,https://guide.michelin.com/en/taipei-region/taipei/restaurant/dasuke
+Din Tai Fung (Xinyi Road),,Taipei,Bib Gourmand,,25.03381,121.5322,https://guide.michelin.com/en/taipei-region/taipei/restaurant/din-tai-fung-xinyi-road
+EMBERS,,Taipei,Selected,,25.0358522,121.5502668,https://guide.michelin.com/en/taipei-region/taipei/restaurant/embers
+Eika,,Taipei,2 Stars,,25.0574848,121.5105147,https://guide.michelin.com/en/taipei-region/taipei/restaurant/eika
+Ephernité,,Taipei,Selected,,25.0251526,121.5503531,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ephernite
+FRASSI,,Taipei,1 Star,,25.0828482,121.5591578,https://guide.michelin.com/en/taipei-region/taipei/restaurant/frassi
+Fon-Cé,,Taipei,Selected,,25.040508,121.550213,https://guide.michelin.com/en/taipei-region/taipei/restaurant/fon-ce
+Fujin Tree Taiwanese Cuisine & Champagne (Songshan),,Taipei,1 Star,,25.0565712,121.5528189,https://guide.michelin.com/en/taipei-region/taipei/restaurant/fujin-tree-taiwanese-cuisine-champagne-songshan
+Gi Yuan,,Taipei,Selected,,25.0353132,121.5484324,https://guide.michelin.com/en/taipei-region/taipei/restaurant/gi-yuan
+Golden Formosa,,Taipei,1 Star,,25.118368,121.536248,https://guide.michelin.com/en/taipei-region/taipei/restaurant/golden-formosa
+Good Friend Cold Noodles,,Taipei,Selected,,25.0891725,121.525463,https://guide.michelin.com/en/taipei-region/taipei/restaurant/good-friend-cold-noodles
+HUGH dessert dining,,Taipei,Bib Gourmand,,25.0676278,121.5121712,https://guide.michelin.com/en/taipei-region/taipei/restaurant/hugh
+Halal Chinese Beef Noodles (Da'an),,Taipei,Selected,,25.0422509,121.5549813,https://guide.michelin.com/en/taipei-region/taipei/restaurant/halal-chinese-beef-noodles
+Hang Zhou Xiao Long Bao (Da'an),,Taipei,Bib Gourmand,,25.0341512,121.5236407,https://guide.michelin.com/en/taipei-region/taipei/restaurant/hang-zhou-xiao-long-bao-da-an
+Hijo,,Taipei,Selected,,25.0482023,121.5399884,https://guide.michelin.com/en/taipei-region/taipei/restaurant/hijo
+Hosu,,Taipei,1 Star,,25.036396,121.553234,https://guide.michelin.com/en/taipei-region/taipei/restaurant/hosu
+Hsiao Cho Chih Chia,,Taipei,Bib Gourmand,,25.065868,121.530352,https://guide.michelin.com/en/taipei-region/taipei/restaurant/hsiao-cho-chih-chia
+Hsiung Chi Scallion Pancake,,Taipei,Bib Gourmand,,25.0129692,121.5357748,https://guide.michelin.com/en/taipei-region/taipei/restaurant/hsiung-chi-scallion-pancake
+Huang Chi Lu Rou Fan,,Taipei,Bib Gourmand,,25.0636638,121.5241848,https://guide.michelin.com/en/taipei-region/taipei/restaurant/huang-chi-lu-rou-fan
+INITA,,Taipei,1 Star,,25.0460871,121.5505871,https://guide.michelin.com/en/taipei-region/taipei/restaurant/inita
+Impromptu by Paul Lee,,Taipei,1 Star,,25.054178,121.524244,https://guide.michelin.com/en/taipei-region/taipei/restaurant/impromptu-by-paul-lee
+Inn's+ (Shuangcheng Street),,Taipei,Bib Gourmand,,25.0658284,121.523703,https://guide.michelin.com/en/taipei-region/taipei/restaurant/inn-s
+Izmir Turk Kitchen,,Taipei,Selected,,25.04272,121.56662,https://guide.michelin.com/en/taipei-region/taipei/restaurant/izmir-turk-kitchen
+JUNTO,,Taipei,Selected,,25.0450877,121.5148534,https://guide.michelin.com/en/taipei-region/taipei/restaurant/junto
+Jen Ho Yuan,,Taipei,Bib Gourmand,,25.0606474,121.5226418,https://guide.michelin.com/en/taipei-region/taipei/restaurant/jen-ho-yuan
+Jin Shang Hsuan,,Taipei,Bib Gourmand,,25.0541826,121.5525346,https://guide.michelin.com/en/taipei-region/taipei/restaurant/jin-shang-hsuan
+KOICHIRO,,Taipei,Selected,,25.082737,121.559439,https://guide.michelin.com/en/taipei-region/taipei/restaurant/koichiro
+KUR,,Taipei,Selected,,25.0355602,121.5531854,https://guide.michelin.com/en/taipei-region/taipei/restaurant/kur
+Ken Anhe,,Taipei,1 Star,,25.0345957,121.552898,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ken-an-ho
+Kiku,,Taipei,1 Star,,25.0341491,121.553009,https://guide.michelin.com/en/taipei-region/taipei/restaurant/kiku-1216129
+Kitcho,,Taipei,1 Star,,25.0442868,121.5506888,https://guide.michelin.com/en/taipei-region/taipei/restaurant/kitcho
+Komboi,,Taipei,Selected,,25.0390421,121.5468894,https://guide.michelin.com/en/taipei-region/taipei/restaurant/komboi
+Kou Gyu Rou,,Taipei,Selected,,25.0557262,121.5107843,https://guide.michelin.com/en/taipei-region/taipei/restaurant/kou-gyu-rou
+L'Atelier de Joël Robuchon,,Taipei,2 Stars,,25.039609,121.56814,https://guide.michelin.com/en/taipei-region/taipei/restaurant/l-atelier-de-joel-robuchon550759
+La Vie by Thomas Bühner,,Taipei,1 Star,,25.08254,121.55429,https://guide.michelin.com/en/taipei-region/taipei/restaurant/la-vie-by-thomas-buhner
+Lao Shan Dong Homemade Noodles,,Taipei,Bib Gourmand,,25.0435862,121.5059525,https://guide.michelin.com/en/taipei-region/taipei/restaurant/lao-shan-dong-homemade-noodles
+Le Palais,,Taipei,3 Stars,,25.0491625,121.5168892,https://guide.michelin.com/en/taipei-region/taipei/restaurant/le-palais
+Lin,,Taipei,Selected,,25.0357325,121.5549234,https://guide.michelin.com/en/taipei-region/taipei/restaurant/lin
+Lin Ju,,Taipei,Selected,,25.0534541,121.547928,https://guide.michelin.com/en/taipei-region/taipei/restaurant/lin-ju
+Lin's Vegetable Lamb Hotpot,,Taipei,Selected,,25.063854,121.530475,https://guide.michelin.com/en/taipei-region/taipei/restaurant/lin-s-vegetable-lamb-hotpot
+Little Tree Food (Da'an Road),,Taipei,Bib Gourmand,,25.0399033,121.5447888,https://guide.michelin.com/en/taipei-region/taipei/restaurant/little-tree-food-da-an-road
+Mai Mien Yen Tsai,,Taipei,Bib Gourmand,,25.0610377,121.5098001,https://guide.michelin.com/en/taipei-region/taipei/restaurant/mai-mien-yen-tsai
+May Snow Hakka Food,,Taipei,Selected,,25.034046,121.549961,https://guide.michelin.com/en/taipei-region/taipei/restaurant/may-snow-hakka-food
+Ming Fu,,Taipei,1 Star,,25.0617759,121.524353,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ming-fu
+Mipon,,Taipei,1 Star,,25.080373,121.553699,https://guide.michelin.com/en/taipei-region/taipei/restaurant/mipon
+Mizue,,Taipei,2 Stars,,25.05364,121.549228,https://guide.michelin.com/en/taipei-region/taipei/restaurant/mizue
+Mochi Baby,,Taipei,Selected,,25.0505554,121.5756301,https://guide.michelin.com/en/taipei-region/taipei/restaurant/mochi-baby
+Molino de Urdániz,,Taipei,2 Stars,,25.0507432,121.5372068,https://guide.michelin.com/en/taipei-region/taipei/restaurant/molino-de-urdaniz
+MoonMoonFood (Qingdao East Road),,Taipei,Bib Gourmand,,25.043659,121.522054,https://guide.michelin.com/en/taipei-region/taipei/restaurant/shuang-yue-food
+Motoichi,,Taipei,1 Star,,25.039966,121.553788,https://guide.michelin.com/en/taipei-region/taipei/restaurant/motoichi
+Mountain and Sea House,,Taipei,1 Star,,25.0380165,121.5313736,https://guide.michelin.com/en/taipei-region/taipei/restaurant/mountain-and-sea-house
+Mudan,,Taipei,2 Stars,,25.0351348,121.547105,https://guide.michelin.com/en/taipei-region/taipei/restaurant/mudan
+Muji Beef Noodles,,Taipei,Selected,,25.0274656,121.5634637,https://guide.michelin.com/en/taipei-region/taipei/restaurant/muji-beef-noodles
+Mume,,Taipei,1 Star,,25.036278,121.548015,https://guide.michelin.com/en/taipei-region/taipei/restaurant/mume
+NOBUO,,Taipei,2 Stars,,25.0400402,121.5278581,https://guide.michelin.com/en/taipei-region/taipei/restaurant/nobuo
+N°168 Prime Steakhouse (Zhongshan),,Taipei,Selected,,25.0841413,121.5588621,https://guide.michelin.com/en/taipei-region/taipei/restaurant/n%C2%B0168-prime-steakhouse-zhongshan
+Open Smile,,Taipei,Bib Gourmand,,25.0271433,121.5671518,https://guide.michelin.com/en/taipei-region/taipei/restaurant/open-smile
+PEI FULL,,Taipei,Selected,,25.0421659,121.557317,https://guide.michelin.com/en/taipei-region/taipei/restaurant/pei-full
+Page (Zhongshan),,Taipei,Selected,,25.08184,121.547774,https://guide.michelin.com/en/taipei-region/taipei/restaurant/page
+Paris 1930 de Hideki Takayama,,Taipei,Selected,,25.0628,121.52997,https://guide.michelin.com/en/taipei-region/taipei/restaurant/paris-1930-de-hideki-takayama
+Pàng,,Taipei,Bib Gourmand,,25.03261,121.55215,https://guide.michelin.com/en/taipei-region/taipei/restaurant/pang
+Really Good Seafood,,Taipei,Selected,,25.039168,121.54344,https://guide.michelin.com/en/taipei-region/taipei/restaurant/really-good-seafood
+Restaurant 12,,Taipei,1 Star,,25.1353141,121.5470616,https://guide.michelin.com/en/taipei-region/taipei/restaurant/restaurant-12
+Robin's Teppanyaki,,Taipei,Selected,,25.054231,121.524194,https://guide.michelin.com/en/taipei-region/taipei/restaurant/robin-s-teppanyaki
+Rong Ju,,Taipei,Selected,,25.05364,121.549228,https://guide.michelin.com/en/taipei-region/taipei/restaurant/rong-ju
+Rong Rong Yuan,,Taipei,Selected,,25.0335861,121.5446576,https://guide.michelin.com/en/taipei-region/taipei/restaurant/rong-rong-yuan
+SENS,,Taipei,1 Star,,25.0588994,121.5473342,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sens-1204678
+Saffron Fine Indian Cuisine,,Taipei,Bib Gourmand,,25.1175507,121.5327248,https://guide.michelin.com/en/taipei-region/taipei/restaurant/saffron
+Sansan Bistro,,Taipei,Selected,,25.024091,121.548346,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sansan-bistro
+Sasa,,Taipei,Selected,,25.0545533,121.5221023,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sasa
+Sate House,,Taipei,Selected,,25.0280822,121.5512975,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sate-house
+Serenity (Zhongzheng),,Taipei,Bib Gourmand,,25.044366,121.521854,https://guide.michelin.com/en/taipei-region/taipei/restaurant/serenity
+Set.,,Taipei,Selected,,25.0588036,121.5181918,https://guide.michelin.com/en/taipei-region/taipei/restaurant/set
+Shih Chia Big Rice Ball,,Taipei,Selected,,25.06512,121.51097,https://guide.michelin.com/en/taipei-region/taipei/restaurant/shih-chia-big-rice-ball
+Shin Yeh Taiwanese Cuisine,,Taipei,Selected,,25.066534,121.524189,https://guide.michelin.com/en/taipei-region/taipei/restaurant/shin-yeh-taiwanese-cuisine
+Shin Yeh Taiwanese Delight (Nangang),,Taipei,Selected,,25.058745,121.6157559,https://guide.michelin.com/en/taipei-region/taipei/restaurant/shin-yeh-taiwanese-delight-nangang
+Shin Yeh Taiwanese Signature,,Taipei,1 Star,,25.0803851,121.5593471,https://guide.michelin.com/en/taipei-region/taipei/restaurant/shin-yeh-taiwanese-signature
+Shing-Peng-Lai (Zhongshan North Road),,Taipei,Selected,,25.120419,121.53094,https://guide.michelin.com/en/taipei-region/taipei/restaurant/shing-peng-lai
+Silks House,,Taipei,1 Star,,25.0542098,121.5239459,https://guide.michelin.com/en/taipei-region/taipei/restaurant/silks-house
+Sinchao Rice Shoppe,,Taipei,Bib Gourmand,,25.0406268,121.5667396,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sinchao-rice-shoppe
+Soft Power,,Taipei,Bib Gourmand,,25.06425,121.53611,https://guide.michelin.com/en/taipei-region/taipei/restaurant/soft-power
+Su Lai Chuan,,Taipei,Bib Gourmand,,25.0350132,121.497697,https://guide.michelin.com/en/taipei-region/taipei/restaurant/su-lai-chuan
+Sung Chu Yuan,,Taipei,Bib Gourmand,,25.1398182,121.5675751,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sung-chu-yuan
+Sushi Akira,,Taipei,1 Star,,25.06614,121.52486,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sushi-akira
+Sushi Kajin,,Taipei,1 Star,,25.0515312,121.5299594,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sushi-kajin
+Sushi Kaori,,Taipei,Selected,,25.0611862,121.5261635,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sushi-kaori
+Sushi Nomura,,Taipei,Selected,,25.036207,121.554783,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sushi-nomura
+Sushi Ryu,,Taipei,1 Star,,25.0558134,121.5271858,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sushi-ryu
+Sushi Touryuumon,,Taipei,Selected,,25.039792,121.5540329,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sushi-touryuumon
+Sushiyoshi,,Taipei,1 Star,,25.0402806,121.5537337,https://guide.michelin.com/en/taipei-region/taipei/restaurant/sushiyoshi
+T+T,,Taipei,1 Star,,25.054864,121.550721,https://guide.michelin.com/en/taipei-region/taipei/restaurant/t-t
+Tableau by Craig Yang,,Taipei,Bib Gourmand,,25.0351284,121.5503502,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tableau-by-craig-yang
+Tajimaya Shabu Shabu,,Taipei,Selected,,25.055637,121.548475,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tajimaya-shabu-shabu
+Talking Heads,,Taipei,Bib Gourmand,,25.0354792,121.5482005,https://guide.michelin.com/en/taipei-region/taipei/restaurant/talking-heads
+Taïrroir,,Taipei,3 Stars,,25.082896,121.559303,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tairroir
+Tempura Sugimura,,Taipei,Selected,,25.080443,121.5591385,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tempura-sugimura
+Thai & Thai,,Taipei,Selected,,25.055589,121.548152,https://guide.michelin.com/en/taipei-region/taipei/restaurant/thai-thai
+The Dragon,,Taipei,Selected,,25.044601,121.521862,https://guide.michelin.com/en/taipei-region/taipei/restaurant/the-dragon
+The Guest House,,Taipei,1 Star,,25.0446816,121.5220238,https://guide.michelin.com/en/taipei-region/taipei/restaurant/the-guest-house
+Tien Hsia San Chueh,,Taipei,Bib Gourmand,,25.038915,121.54525,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tien-hsia-san-chueh
+Tien Hsiang Lo,,Taipei,1 Star,,25.062841,121.529965,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tien-hsiang-lo
+Toriaezu Curry,,Taipei,Bib Gourmand,,25.0608374,121.5633763,https://guide.michelin.com/en/taipei-region/taipei/restaurant/toriaezu-curry
+Tsui Feng Yuan,,Taipei,Bib Gourmand,,25.0474845,121.5498352,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tsui-feng-yuan
+Tsuki Yo Iwa,,Taipei,Selected,,25.0662965,121.5248202,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tsuki-yo-iwa
+Tutto Bello,,Taipei,Selected,,25.066293,121.525352,https://guide.michelin.com/en/taipei-region/taipei/restaurant/tutto-bello
+Uke,,Taipei,Selected,,25.0351541,121.5501646,https://guide.michelin.com/en/taipei-region/taipei/restaurant/uke
+Unnamed Clay Oven Roll,,Taipei,Bib Gourmand,,25.0284359,121.5067445,https://guide.michelin.com/en/taipei-region/taipei/restaurant/unnamed-clay-oven-roll
+Uosho,,Taipei,Selected,,25.0499609,121.5238215,https://guide.michelin.com/en/taipei-region/taipei/restaurant/uosho
+Vanne Yakiniku,,Taipei,Selected,,25.04021,121.54932,https://guide.michelin.com/en/taipei-region/taipei/restaurant/vanne-yakiniku
+Wamaki,,Taipei,Selected,,25.0481058,121.5315925,https://guide.michelin.com/en/taipei-region/taipei/restaurant/wamaki
+Wang's Broth,,Taipei,Bib Gourmand,,25.03921,121.49846,https://guide.michelin.com/en/taipei-region/taipei/restaurant/hsiao-wang-steamed-minced-pork-with-pickles-in-broth
+Wok by O'BOND,,Taipei,1 Star,,25.0479656,121.5402246,https://guide.michelin.com/en/taipei-region/taipei/restaurant/wok-by-o-bond
+Wu Wang Tsai Chi,,Taipei,Bib Gourmand,,25.02878,121.50667,https://guide.michelin.com/en/taipei-region/taipei/restaurant/wu-wang-tsai-chi
+Xiang Se,,Taipei,Selected,,25.0328173,121.5149464,https://guide.michelin.com/en/taipei-region/taipei/restaurant/xiang-se
+Xiao Ping Kitchen (Zhongshan),,Taipei,Selected,,25.0639495,121.5290815,https://guide.michelin.com/en/taipei-region/taipei/restaurant/xiao-ping-kitchen
+Ya Ge,,Taipei,1 Star,,25.055801,121.548349,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ya-ge
+Yangming Spring (Shilin),,Taipei,Selected,,25.1442022,121.5595115,https://guide.michelin.com/en/taipei-region/taipei/restaurant/yangming-spring-shilin
+Yi Jia Zi,,Taipei,Bib Gourmand,,25.040415,121.5021738,https://guide.michelin.com/en/taipei-region/taipei/restaurant/yi-jia-zi
+Yu Kapo,,Taipei,2 Stars,,25.0539984,121.5636541,https://guide.michelin.com/en/taipei-region/taipei/restaurant/yu-kapo-1198592
+Yu Yu 1969,,Taipei,Bib Gourmand,,25.049029,121.542052,https://guide.michelin.com/en/taipei-region/taipei/restaurant/yu-yu-1969
+Yuan Fang Guabao,,Taipei,Bib Gourmand,,25.039542,121.498529,https://guide.michelin.com/en/taipei-region/taipei/restaurant/yuan-fang-guabao
+Yuan Huan Pien Oyster Egg Omelette,,Taipei,Selected,,25.0563308,121.5152488,https://guide.michelin.com/en/taipei-region/taipei/restaurant/yuan-huan-pien-oyster-egg-omelette
+Yuu,,Taipei,Selected,,25.039543,121.55378,https://guide.michelin.com/en/taipei-region/taipei/restaurant/yuu
+ZEA,,Taipei,1 Star,,25.03634,121.5541294,https://guide.michelin.com/en/taipei-region/taipei/restaurant/zea
+Zaap,,Taipei,Selected,,25.02673,121.56635,https://guide.michelin.com/en/taipei-region/taipei/restaurant/zaap
+aMaze,,Taipei,1 Star,,25.0813502,121.5519929,https://guide.michelin.com/en/taipei-region/taipei/restaurant/amaze
+de nuit,,Taipei,1 Star,,25.0334532,121.5505992,https://guide.michelin.com/en/taipei-region/taipei/restaurant/de-nuit
+fumée,,Taipei,Selected,,25.05407,121.52506,https://guide.michelin.com/en/taipei-region/taipei/restaurant/fumee
+logy,,Taipei,2 Stars,,25.0749106,121.5748182,https://guide.michelin.com/en/taipei-region/taipei/restaurant/logy
+ÉCRU,,Taipei,Selected,,25.04315,121.55039,https://guide.michelin.com/en/taipei-region/taipei/restaurant/ecru

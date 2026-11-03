@@ -10,6 +10,7 @@ from tests.conftest import DTF_SC, FIXTURES, google_place
 def test_health(make_client):
     with make_client() as c:
         assert c.get("/healthz").json() == {"status": "ok"}
+        assert c.get("/health").json() == {"status": "ok"}
 
 
 def test_nearby_rating_order_and_merges_yelp(make_client, mock_apis):
@@ -300,7 +301,7 @@ def test_tripadvisor_us(make_client, mock_apis):
     assert req.headers["X-API-Key"] == "ta-key" and "key" not in req.url.params
     p = req.url.params
     assert (p["query"], p["category"], p["country_code"], p["size"]) == ("Noodle House", "RESTAURANT", "US", "2")
-    assert p["version"] == "1" and p.get_list("locale") == ["en"]
+    assert p["version"] == "1" and p.get_list("locale") == ["en-US"]
     # Search results already carry the rating, so no separate details call.
     assert not mock_apis.routes[DETAILS].called
 
@@ -394,7 +395,7 @@ def test_tripadvisor_taiwan_matches_by_position(make_client, mock_apis):
     assert data["rows"][0]["links"] == []
     search = mock_apis.routes[SEARCH].calls[0].request.url.params
     assert (search["country_code"], search["postal_code"]) == ("TW", "110")
-    assert mock_apis.routes[NEARBY].calls[0].request.url.params.get_list("locale") == ["zh-TW", "en"]
+    assert mock_apis.routes[NEARBY].calls[0].request.url.params.get_list("locale") == ["zh-TW", "en-US"]
     assert mock_apis.routes[REVIEWS].calls[0].request.url.params["language"] == "primary"
 
 

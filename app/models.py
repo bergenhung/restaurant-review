@@ -42,6 +42,14 @@ class Hours(BaseModel):
     today: str | None = Field(None, description="Today's hours, e.g. '11:00 AM – 9:00 PM'")
 
 
+class ReviewSummary(BaseModel):
+    """Google's AI summary of a place's reviews. Shown with its disclosure and a link to the reviews."""
+    text: str
+    disclosure: str = "Summarized with Gemini"
+    reviews_url: str | None = None
+    flag_url: str | None = None
+
+
 class Place(BaseModel):
     """A restaurant as one source describes it."""
     source: str
@@ -59,6 +67,7 @@ class Place(BaseModel):
     hours: Hours | None = None
     price_range: str | None = None  # e.g. "$20–30"
     business_status: str | None = None  # OPERATIONAL, CLOSED_TEMPORARILY, CLOSED_PERMANENTLY
+    review_summary: ReviewSummary | None = None
     reviews: list[Review] = Field(default_factory=list)
 
 
@@ -92,6 +101,7 @@ class ResultRow(BaseModel):
     all_time_rating: float | None = Field(None, description="Review-count-weighted average across sources")
     recent_3_months: RecentRating
     michelin: str | None = None
+    review_summary: ReviewSummary | None = None
     michelin_url: str | None = Field(None, description="The restaurant's page in the Michelin Guide")
     top_dishes: list[str] = Field(default_factory=list)
     links: list[Link] = Field(default_factory=list, description="Other sites to check by hand, e.g. Yelp")

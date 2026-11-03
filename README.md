@@ -44,7 +44,7 @@ You can also force a market with `market=us` or `market=tw`.
 | `GET /v1/locate?address=` | Coordinates for an address or cross streets (used by the map picker) |
 | `GET /v1/nearby?address=&count=&within_km=&cuisine=&price=&min_rating=&sort=` or `?lat=&lng=…` | The `count` (1–10, default 3) restaurants closest to an address, within `within_km` (default 1, max 10). `sort` is `distance` (default) or `rating`. `place_id` and `session` come from address autocomplete. |
 | `GET /docs` | Interactive OpenAPI docs |
-| `GET /healthz` | Health check |
+| `GET /health` | Health check (`/healthz` works locally; Cloud Run reserves paths ending in "z") |
 
 Add `format=html` to `/v1/verify` or `/v1/nearby` for a rendered page: a map with numbered pins plus the table. In near-an-address mode the map also shows the address (dark pin) and the distance limit (circle), and the table gets a distance column. Clicking a row opens its pin, and clicking a pin highlights its row. `price` takes `$$`, `$-$$$` or `1,2`.
 

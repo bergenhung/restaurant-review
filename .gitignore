@@ -1,9 +1,10 @@
-# Environments
 .venv/
-.env
-.env.example
-
-# Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc
 .pytest_cache/
+.env
+# Terraform: local working files and state (state lives in a Cloud Storage bucket)
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars

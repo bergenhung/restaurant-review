@@ -22,11 +22,14 @@ TW_HINTS = (
     "高雄", "新竹", "桃園", "基隆", "台東", "臺東", "花蓮", "宜蘭",
 )
 RECENT_DAYS = 90
+# Part of every cached result's key: bump it when results are built differently, so old ones aren't reused.
+RESULTS_VERSION = 2
 REGION = {Market.us: "US", Market.tw: "TW"}
 BRANCH_SEARCH_RADIUS_M = 20000  # look for branches around the typed location
 MAX_ALTERNATIVES = 4
 PICKED_PLACE_MAX_KM = 50  # a picked suggestion further than this from the typed location is another branch
 MIN_RECENT_FOR_CONFIDENCE = 5
+MIN_RECENT_TO_SHOW = 3
 PRIOR_MEAN = 3.8   # Bayesian prior: a typical restaurant rating
 PRIOR_WEIGHT = 50  # how many "virtual reviews" the prior counts as
 
@@ -108,7 +111,7 @@ class ReviewService:
         explicit = market
         market = detect_market(location, market)
         query = {"name": name, "location": location}
-        cache_key = f"verify|{market.value}|{place_id or ''}|{name.lower()}|{location.lower()}"
+        cache_key = f"verify|{RESULTS_VERSION}|{market.value}|{place_id or ''}|{name.lower()}|{location.lower()}"
         if cached := await self.store.get_cached(cache_key):
             log.info("cache hit", extra={"cache_key": cache_key})
             return ResultTable(**cached)
@@ -220,22 +223,39 @@ class ReviewService:
         query = {"address": address, "count": count, "within_km": within_km, "cuisine": cuisine,
                  "price": price_levels, "min_rating": min_rating, "sort": sort}
         # Rounded to ~10 m, so the same address typed or picked shares the cache.
-        cache_key = (f"nearby|{market.value}|{lat:.4f},{lng:.4f}|"
+        cache_key = (f"nearby|{RESULTS_VERSION}|{market.value}|{lat:.4f},{lng:.4f}|"
                      f"{sorted((k, str(v).lower()) for k, v in query.items() if k != 'address')}")
         if cached := await self.store.get_cached(cache_key):
             log.info("cache hit", extra={"cache_key": cache_key})
             return ResultTable(**cached)
 
-        text = f"{cuisine} restaurant" if cuisine else "restaurant"
-        found = await self.google.search(text, market, price_levels=price_levels, min_rating=min_rating,
-                                         limit=20, center=(lat, lng), radius_m=within_km * 1000)
-        # Google's distance ranking is a bias, so measure and enforce the radius here.
-        candidates = sorted(
-            ((distance_km(lat, lng, p.lat, p.lng), p) for p in found
-             if p.lat is not None and p.lng is not None and p.business_status != "CLOSED_PERMANENTLY"),
-            key=lambda t: t[0],
-        )
-        candidates = [(d, p) for d, p in candidates if d <= within_km][:count]
+        center, radius_m = (lat, lng), within_km * 1000
+
+        def passes(p: Place) -> bool:
+            if p.lat is None or p.lng is None or p.business_status == "CLOSED_PERMANENTLY":
+                return False
+            if distance_km(lat, lng, p.lat, p.lng) > within_km:
+                return False
+            if price_levels and p.price_level not in price_levels:
+                return False
+            return not (min_rating and (p.rating or 0) < min_rating)
+
+        found: dict[str, Place] = {}
+        if not cuisine:
+            # Every restaurant within the radius, nearest first (up to 20), the way Google Maps lists them.
+            for p in await self.google.nearby_restaurants(center, radius_m, market):
+                found.setdefault(p.source_id, p)
+        if cuisine or sum(passes(p) for p in found.values()) < count:
+            # A cuisine, or filters that left too few of the nearest 20: search the same area by
+            # text, with Google applying the price and rating filters, and page further only if needed.
+            text = f"{cuisine} restaurant" if cuisine else "restaurant"
+            more = await self.google.area_search(
+                text, market, center, radius_m, price_levels=price_levels, min_rating=min_rating,
+                enough=lambda ps: sum(passes(p) for p in ps) >= count)
+            for p in more:
+                found.setdefault(p.source_id, p)
+        candidates = sorted(((distance_km(lat, lng, p.lat, p.lng), p) for p in found.values() if passes(p)),
+                            key=lambda t: t[0])[:count]
         if not candidates:
             filters = " with those filters" if (cuisine or price_levels or min_rating) else ""
             raise NotFound(f"No restaurants{filters} within {within_km:g} km of {label}. Try a larger distance.")
@@ -377,7 +397,8 @@ class ReviewService:
             recent_3_months=_recent(all_reviews),
             michelin=michelin_label,
             michelin_url=michelin_url,
-            top_dishes=extract_dishes(all_reviews),
+            top_dishes=extract_dishes(all_reviews, summary=place.review_summary.text if place.review_summary else None),
+            review_summary=place.review_summary,
             links=_manual_links(place, market, has_yelp_rating=any(r.source == "yelp" for r in ratings)),
             directions_url=_directions_url(place),
             source_status=status,
@@ -388,9 +409,11 @@ class ReviewService:
         used, skipped = self._source_status(market)
         notes = [
             "All-time ratings come straight from each site.",
-            f"The 3-month rating uses reviews saved by this service in the last {RECENT_DAYS} days; "
-            "the sites return only a few reviews per request, so it grows more reliable over time.",
-            "Top dishes are estimated from phrases in saved reviews.",
+            f"The 3-month rating averages the reviews from the last {RECENT_DAYS} days that this service has "
+            f"seen. Google shares only 5 reviews per restaurant (its most relevant, not its newest) and "
+            f"Tripadvisor a few more, so it's shown only once there are at least {MIN_RECENT_TO_SHOW}.",
+            "Top dishes come from Google's review summary where there is one, and from dishes at least two "
+            "reviewers mention.",
         ]
         notes.append("Michelin status comes from a list kept with this service and is shown only when the "
                      "listed restaurant is at this exact address; it links to the Guide's page.")
@@ -465,7 +488,8 @@ def _recent(reviews: list[Review]) -> RecentRating:
     cutoff = datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
     recent = [r.rating for r in reviews if r.rating is not None and r.published_at and r.published_at >= cutoff]
     return RecentRating(
-        average=round(sum(recent) / len(recent), 2) if recent else None,
+        # One or two reviews say little about the last 3 months, so no average is given for them.
+        average=round(sum(recent) / len(recent), 2) if len(recent) >= MIN_RECENT_TO_SHOW else None,
         review_count=len(recent),
         low_confidence=len(recent) < MIN_RECENT_FOR_CONFIDENCE,
         window_days=RECENT_DAYS,

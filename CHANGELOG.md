@@ -19,6 +19,11 @@ What changed in the app (P0) and the infrastructure, newest first.
 - **Tripadvisor matching:** an exact name ("Bouche") wins over a similar one ("Bouchon") from the same
   search; no-matches remembered under the old rules are checked again; a no-match now logs the
   candidates Tripadvisor returned. (`app/sources/tripadvisor.py`)
+- **Tripadvisor locale:** names are requested as `en-US` (and `zh-TW`, `en-US` for Taiwan). Terra
+  rejects plain `en` with a 400, which made every first search fail. Reviews are retried without
+  the language setting if Terra rejects that too. (`app/sources/tripadvisor.py`)
+- **Health check:** `deploy.sh` and `ship.sh` check `/health`. Cloud Run reserves some paths ending
+  in "z", so `/healthz` gets Google's own 404 on the deployed site. (`app/main.py`)
 - Cached results from before these changes aren't reused.
 
 ### Added

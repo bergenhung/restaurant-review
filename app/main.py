@@ -79,7 +79,7 @@ ICONS = {
     "/icon-192.png": ("icon-192.png", "image/png"),
     "/icon-512.png": ("icon-512.png", "image/png"),
 }
-OPEN_PATHS = {"/", "/healthz", "/docs", "/openapi.json", "/redoc", "/manifest.webmanifest", *ICONS}
+OPEN_PATHS = {"/", "/health", "/healthz", "/docs", "/openapi.json", "/redoc", "/manifest.webmanifest", *ICONS}
 
 
 @app.middleware("http")
@@ -207,8 +207,11 @@ async def manifest():
     )
 
 
+# Cloud Run reserves some paths ending in "z" (Google answers them with its own 404), so the
+# deployed check uses /health; /healthz is kept for local runs and older scripts.
+@app.get("/health", include_in_schema=False)
 @app.get("/healthz", include_in_schema=False)
-async def healthz():
+async def health():
     return {"status": "ok"}
 
 

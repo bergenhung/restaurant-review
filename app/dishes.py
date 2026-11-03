@@ -7,7 +7,8 @@ A simple, explainable heuristic in two steps:
    duck...) and no word about the visit (place, service, menu...). This drops things like
    "version", "annoyed face" or "pleasure" that follow the same cue words.
 
-Mentions are counted once per review; dishes several reviewers mention come first. It's labelled
+Mentions are counted once per review, and only dishes at least two reviewers mention are kept.
+Dishes named in Google's AI review summary (when Google has one) come first. It's labelled
 as an estimate in the response. Swapping in an LLM later only means replacing extract_dishes().
 """
 import re
@@ -68,6 +69,7 @@ mojito martini negroni sangria mimosa wine beer ale ipa sake soju
 cheese charcuterie fondue raclette platter board flatbread mac slaw coleslaw cornbread onion rings
 potato potatoes mash gratin vegetable veggies greens beans sprouts mushroom mushrooms cauliflower eggplant
 asparagus spinach kale corn avocado tofu tempeh seitan
+chocolate financier fougasse madeleine profiterole galette canele cannele brioche gratin gougere
 """.split())
 # Multi-word foods whose last word alone isn't distinctive.
 FOOD_PHRASES = {"ice cream", "panna cotta", "creme brulee", "pad thai", "pad see ew", "banh mi", "khao soi",
@@ -118,7 +120,27 @@ def _clean(phrase: str) -> str | None:
     return candidate
 
 
-def extract_dishes(reviews: list[Review], top_n: int = 5) -> list[str]:
+SUMMARY_SPLIT = re.compile(r",|;|\.|\band\b|&|\bas well as\b|\balong with\b|\bsuch as\b|\bincluding\b", re.I)
+LEADING = re.compile(r"^(?:.*\b(?:the|their|its|a|an)\s+)", re.I)
+
+
+def summary_dishes(text: str) -> list[str]:
+    """Dishes named in Google's review summary, e.g. "Diners praise the duck breast, pork tenderloin
+    and chocolate financier, along with the friendly service." -> duck breast, pork tenderloin,
+    chocolate financier. Each list item is reduced to the words after its last article."""
+    out: list[str] = []
+    for part in SUMMARY_SPLIT.split(text or ""):
+        part = LEADING.sub("", part.strip())
+        words = re.findall(_WORD, part)[-4:]
+        if words and (d := _clean(" ".join(words))) and d not in out:
+            out.append(d)
+    return out
+
+
+def extract_dishes(reviews: list[Review], top_n: int = 5, summary: str | None = None) -> list[str]:
+    """Dishes from Google's review summary first (it reflects all of a place's reviews), then
+    dishes that at least two reviewers mention. A dish one reviewer mentions isn't shown: with only
+    the handful of reviews the sites share, a single mention is as likely a side note as a favourite."""
     counts: Counter[str] = Counter()
     shown: dict[str, Counter[str]] = defaultdict(Counter)  # key -> spellings seen ("pizza", "pizzas")
     for r in reviews:
@@ -136,6 +158,9 @@ def extract_dishes(reviews: list[Review], top_n: int = 5) -> list[str]:
                     shown[d][d] += 1
                     seen.add(d)
         counts.update(seen)
-    # Prefer dishes several reviewers mention; fall back to single mentions if that's all there is.
-    ranked = [k for k, c in counts.most_common() if c >= 2] or [k for k, _ in counts.most_common()]
-    return [shown[k].most_common(1)[0][0] for k in ranked[:top_n]]
+    result = summary_dishes(summary) if summary else []
+    taken = {" ".join(_singular(w) for w in d.split()) for d in result}
+    for key, c in counts.most_common():
+        if c >= 2 and key not in taken:
+            result.append(shown[key].most_common(1)[0][0])
+    return result[:top_n]

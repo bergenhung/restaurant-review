@@ -6,6 +6,8 @@
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:?Set PROJECT_ID}"
+# Accept the project number too (e.g. 981869842988): some commands (Firestore) only take the ID.
+PROJECT_ID="$(gcloud projects describe "$PROJECT_ID" --format='value(projectId)')"
 REGION="${REGION:-us-west1}"     # us-west1/us-central1/us-east1 are in the 5 GB always-free storage tier
 BUCKET="${PROJECT_ID}-tfstate"
 

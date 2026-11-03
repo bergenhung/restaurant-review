@@ -1,11 +1,13 @@
 """Google Places API (New). Gives the all-time rating, review count and up to 5 reviews per place."""
 import logging
+import math
 import re
 from datetime import datetime
+from typing import Callable
 
 import httpx
 
-from app.models import Hours, Market, Place, Review
+from app.models import Hours, Market, Place, Review, ReviewSummary
 
 log = logging.getLogger(__name__)
 
@@ -17,8 +19,11 @@ FIELD_MASK = ",".join(
         "googleMapsUri", "location", "primaryTypeDisplayName", "reviews",
         # Hours and price range: no extra cost, since reviews already put requests in Google's top tier.
         "regularOpeningHours", "utcOffsetMinutes", "priceRange", "businessStatus",
+        # Google's AI summary of the reviews (US English; same billing tier as reviews).
+        "reviewSummary",
     )
 )
+NEARBY_URL = "https://places.googleapis.com/v1/places:searchNearby"
 DETAILS_URL = "https://places.googleapis.com/v1/places/{place_id}"
 DETAILS_FIELD_MASK = FIELD_MASK.replace("places.", "")
 AUTOCOMPLETE_URL = "https://places.googleapis.com/v1/places:autocomplete"
@@ -96,6 +101,73 @@ class GooglePlaces:
             resp.raise_for_status()
         places = [self._to_place(p) for p in resp.json().get("places", [])]
         log.info("google places search", extra={"query": query, "results": len(places)})
+        return places
+
+    async def nearby_restaurants(self, center: tuple[float, float], radius_m: float, market: Market,
+                                 limit: int = 20) -> list[Place]:
+        """The restaurants closest to a point, strictly inside the circle, nearest first.
+        This is Google's "what's around here" search; text search treats distance only as a hint."""
+        language, region = LANG[market]
+        body = {
+            "includedTypes": ["restaurant"],
+            "maxResultCount": max(1, min(limit, 20)),
+            "rankPreference": "DISTANCE",
+            "languageCode": language,
+            "regionCode": region,
+            "locationRestriction": {"circle": {
+                "center": {"latitude": center[0], "longitude": center[1]},
+                "radius": min(max(radius_m, 1), 50000),
+            }},
+        }
+        resp = await self.client.post(NEARBY_URL, json=body,
+                                      headers={"X-Goog-Api-Key": self.api_key, "X-Goog-FieldMask": FIELD_MASK})
+        if resp.status_code != 200:
+            log.error("google nearby search failed", extra={"status": resp.status_code, "body": resp.text[:500]})
+            resp.raise_for_status()
+        places = [self._to_place(p) for p in resp.json().get("places", [])]
+        log.info("google nearby search", extra={"results": len(places), "radius_m": radius_m})
+        return places
+
+    async def area_search(self, query: str, market: Market, center: tuple[float, float], radius_m: float,
+                          price_levels: list[int] | None = None, min_rating: float | None = None,
+                          enough: Callable[[list[Place]], bool] | None = None, max_pages: int = 3) -> list[Place]:
+        """Text search (e.g. "ramen restaurant") limited to the area around a point, nearest first.
+        Google pages results 20 at a time; more pages are fetched only until `enough` is satisfied."""
+        language, region = LANG[market]
+        # Text search can only be restricted to a rectangle, so use the box around the circle;
+        # the caller trims to the exact radius.
+        dlat = radius_m / 111_320
+        dlng = radius_m / (111_320 * max(math.cos(math.radians(center[0])), 0.01))
+        body: dict = {
+            "textQuery": query,
+            "languageCode": language,
+            "regionCode": region,
+            "includedType": "restaurant",
+            "pageSize": 20,
+            "rankPreference": "DISTANCE",
+            "locationRestriction": {"rectangle": {
+                "low": {"latitude": center[0] - dlat, "longitude": center[1] - dlng},
+                "high": {"latitude": center[0] + dlat, "longitude": center[1] + dlng},
+            }},
+        }
+        if price_levels:
+            body["priceLevels"] = [PRICE_TO_ENUM[p] for p in price_levels if p in PRICE_TO_ENUM]
+        if min_rating:
+            body["minRating"] = min_rating
+        places: list[Place] = []
+        for page in range(max_pages):
+            resp = await self.client.post(SEARCH_URL, json=body,
+                                          headers={"X-Goog-Api-Key": self.api_key, "X-Goog-FieldMask": FIELD_MASK + ",nextPageToken"})
+            if resp.status_code != 200:
+                log.error("google area search failed", extra={"status": resp.status_code, "body": resp.text[:500]})
+                resp.raise_for_status()
+            data = resp.json()
+            places += [self._to_place(p) for p in data.get("places", [])]
+            token = data.get("nextPageToken")
+            if not token or (enough and enough(places)):
+                break
+            body = {**body, "pageToken": token}  # the rest of the request must stay the same
+        log.info("google area search", extra={"query": query, "results": len(places), "pages": page + 1})
         return places
 
     async def details(self, place_id: str, market: Market, session_token: str | None = None) -> Place | None:
@@ -257,8 +329,21 @@ class GooglePlaces:
             hours=_hours(p),
             price_range=_price_range(p.get("priceRange")),
             business_status=p.get("businessStatus"),
+            review_summary=_review_summary(p.get("reviewSummary")),
             reviews=reviews,
         )
+
+
+def _review_summary(rs: dict | None) -> ReviewSummary | None:
+    text = ((rs or {}).get("text") or {}).get("text")
+    if not text:
+        return None
+    return ReviewSummary(
+        text=text,
+        disclosure=((rs.get("disclosureText") or {}).get("text")) or "Summarized with Gemini",
+        reviews_url=rs.get("reviewsUri"),
+        flag_url=rs.get("flagContentUri"),
+    )
 
 
 CURRENCY = {"USD": "$", "TWD": "NT$", "EUR": "€", "GBP": "£", "JPY": "¥"}

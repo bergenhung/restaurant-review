@@ -18,5 +18,5 @@ gcloud run deploy "$SERVICE" \
   --quiet
 
 URL=$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
-STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/healthz" || true)
+STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/health" || true)
 echo "Health check: HTTP $STATUS   $URL/"

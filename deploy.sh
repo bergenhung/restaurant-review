@@ -121,7 +121,7 @@ echo "Deployed: $URL"
 
 # --allow-unauthenticated can fail with only a warning (e.g. an organization policy blocks
 # public access), so check the site really answers before saying it's ready.
-STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/healthz" || true)
+STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/health" || true)
 if [ "$STATUS" = "200" ]; then
   echo "Open:     $URL/"
 elif [ "$STATUS" = "403" ]; then

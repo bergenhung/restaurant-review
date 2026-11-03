@@ -40,13 +40,16 @@ NAME_SEARCH_MAX_KM = 1.0   # a same-named result further than this from Google's
 COUNTRY = {Market.us: "US", Market.tw: "TW"}
 SEARCH_RADIUS_KM = 0.3
 NAME_MATCH = 0.6
+EXACT_NAME = 0.9
 # When names differ by language (Google: 鼎泰豐, Tripadvisor: Din Tai Fung), accept the
 # nearest result if it's practically at the same spot and nothing else is close.
 SAME_SPOT_KM = 0.03
 LOCATION_ID_TTL_HOURS = 24 * 30
 NO_MATCH_TTL_HOURS = 24 * 7
+MATCH_RULES_VERSION = 2  # bump when matching improves, so remembered no-matches are retried
 REVIEW_LANGUAGE = {Market.us: "en", Market.tw: "primary"}  # "primary" = as written, so local reviews
-NAME_LOCALES = {Market.us: ["en"], Market.tw: ["zh-TW", "en"]}
+# Terra wants region-specific locales: "en-US", not "en" (which it rejects with a 400).
+NAME_LOCALES = {Market.us: ["en-US"], Market.tw: ["zh-TW", "en-US"]}
 
 
 class BudgetExhausted(Exception):
@@ -69,6 +72,7 @@ class Tripadvisor:
         self._spent_today = 0
         self._blocked_day = ""
         self._locale_ok = True
+        self._language_ok = True
         self._last_status = 0
         self._sampled: set[str] = set()
 
@@ -154,8 +158,14 @@ class Tripadvisor:
         reviews_key = f"ta-rev|{market.value}|{location_id}"
         if not await self.store.get_cached(reviews_key):
             try:
-                reviews = await self._get(f"/locations/{location_id}/reviews",
-                                          [("language", REVIEW_LANGUAGE[market]), ("size", "10")], 1, "reviews")
+                params = [("size", "10")]
+                if self._language_ok:
+                    params.insert(0, ("language", REVIEW_LANGUAGE[market]))
+                reviews = await self._get(f"/locations/{location_id}/reviews", params, 1, "reviews")
+                if reviews is None and self._language_ok and self._last_status in (400, 422):
+                    # Same idea as locales: if Terra rejects the language value, ask without it.
+                    self._language_ok = False
+                    reviews = await self._get(f"/locations/{location_id}/reviews", [("size", "10")], 1, "reviews")
             except BudgetExhausted:
                 reviews = None  # keep the rating we already have; try reviews another day
             if reviews is not None:
@@ -171,6 +181,7 @@ class Tripadvisor:
         found = await self._get(path, params + self._locale_params(market), size, kind)
         if found is None and self._locale_ok and self._last_status in (400, 422):
             # If Terra doesn't accept the locale format, stop sending it and retry once.
+            log.warning("tripadvisor rejected the locale; retrying without it", extra={"kind": kind})
             self._locale_ok = False
             found = await self._get(path, params, size, kind)
         return found
@@ -179,8 +190,12 @@ class Tripadvisor:
         """Returns (status, location_id, location-if-already-fetched)."""
         # Per market too: a lookup made with the wrong country (and found nothing) mustn't stick.
         key = f"ta-id|{market.value}|{google_place_id}"
-        if cached := await self.store.get_cached(key):
-            return ("matched", cached["location_id"], None) if cached.get("location_id") else ("no_match", "", None)
+        cached = await self.store.get_cached(key)
+        if cached and cached.get("location_id"):
+            return "matched", cached["location_id"], None
+        if cached and cached.get("v") == MATCH_RULES_VERSION:
+            return "no_match", "", None
+        # (A no-match remembered under older matching rules is checked again.)
 
         best, errored = None, False
         # 1) By name, narrowed to the postal code. Ranking is by name, so a restaurant inside a
@@ -195,6 +210,7 @@ class Tripadvisor:
             errored = True
         else:
             best = match_by_name(name, found.get("data", []), lat, lng, narrowed=bool(postal))
+        name_results = (found or {}).get("data", [])
 
         # 2) Nearby, for names written differently on each site (鼎泰豐 vs Din Tai Fung). Only where
         #    that's common (TRIPADVISOR_FALLBACK_MARKETS); elsewhere a name miss is almost always a
@@ -212,8 +228,13 @@ class Tripadvisor:
         if not location_id:
             if errored:
                 return "error", "", None  # not a confirmed no-match, so don't remember it
-            log.info("tripadvisor no match", extra={"restaurant": name, "postal_code": postal})
-        await self.store.set_cached(key, {"location_id": location_id},
+            log.info("tripadvisor no match", extra={
+                "restaurant": name, "postal_code": postal, "google_lat": lat, "google_lng": lng,
+                # What Tripadvisor offered, so a wrong "not found" can be diagnosed from the log.
+                "candidates": [{"id": c.get("id"), "names": _names(c)[:3], "coords": _coords(c)}
+                               for c in name_results][:5],
+            })
+        await self.store.set_cached(key, {"location_id": location_id, "v": MATCH_RULES_VERSION},
                                     LOCATION_ID_TTL_HOURS if location_id else NO_MATCH_TTL_HOURS)
         return ("matched", location_id, best) if location_id else ("no_match", "", None)
 
@@ -247,6 +268,10 @@ def match_by_name(name: str, results: list[dict], lat: float | None, lng: float 
     named = [(score, r) for score, r in named if score >= NAME_MATCH]
     if not named:
         return None
+    # "Bouche" vs results "Bouche" and "Bouchon": a near-exact name beats merely similar ones.
+    exact = [(score, r) for score, r in named if score >= EXACT_NAME]
+    if exact:
+        named = exact
     located = []
     for score, r in named:
         c = _coords(r)
