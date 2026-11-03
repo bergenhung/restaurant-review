@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars (not committed) and fill in.
+project_id = "restaurants-review-summary"
+region     = "us-west1"
+
+# If the site currently shows the results map, put the same browser key here,
+# otherwise the first plan will show the map settings being removed.
+# maps_browser_key = "AIza..."
+
+# Optional budget alert. Find the ID with:  gcloud billing accounts list
+# billing_account = "012345-6789AB-CDEF01"
+# budget_usd      = 10

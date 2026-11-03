@@ -92,6 +92,7 @@ class ResultRow(BaseModel):
     all_time_rating: float | None = Field(None, description="Review-count-weighted average across sources")
     recent_3_months: RecentRating
     michelin: str | None = None
+    michelin_url: str | None = Field(None, description="The restaurant's page in the Michelin Guide")
     top_dishes: list[str] = Field(default_factory=list)
     links: list[Link] = Field(default_factory=list, description="Other sites to check by hand, e.g. Yelp")
     source_status: dict[str, str] = Field(

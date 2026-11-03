@@ -302,7 +302,7 @@ AUTOCOMPLETE_JS = r"""
       document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
     });
     if (focus) document.getElementById(id).focus();
-    try { history.replaceState(null, "", id === "tab-nearby" ? "#nearby" : "#"); } catch (e) {}
+    try { history.replaceState(null, "", id === "tab-single" ? "#single" : "#"); } catch (e) {}
   }
   tabs.forEach((t, i) => {
     t.addEventListener("click", () => show(t.id));
@@ -310,7 +310,8 @@ AUTOCOMPLETE_JS = r"""
       if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); show(tabs[(i + 1) % tabs.length].id, true); }
     });
   });
-  show(location.hash === "#nearby" ? "tab-nearby" : "tab-single");
+  // Restaurants near an address is the default; "#single" opens One restaurant.
+  show(location.hash === "#single" ? "tab-single" : "tab-nearby");
 })();
 </script>"""
 
@@ -324,15 +325,9 @@ def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
 <title>Cross-site restaurant review</title>{HEAD_ICONS}{STYLE}</head><body><main>
 <h1>Cross-site restaurant review</h1><p class="sub">Find restaurants on Google Maps, then see what Tripadvisor and the Michelin Guide say about each one: ratings all time and for the last 3 months, and the dishes people mention.</p>
 <div class="modes" role="tablist" aria-label="Search mode">
-<button type="button" role="tab" id="tab-single" aria-controls="panel-single" aria-selected="true">One restaurant</button>
-<button type="button" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="false">Restaurants near an address</button>
+<button type="button" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true">Restaurants near an address</button>
+<button type="button" role="tab" id="tab-single" aria-controls="panel-single" aria-selected="false">One restaurant</button>
 </div>
-<fieldset id="panel-single" role="tabpanel" aria-labelledby="tab-single"><legend>Check one restaurant</legend><form id="verify-form" action="/v1/verify" method="get" novalidate>
-<input type="hidden" name="format" value="html"><input type="hidden" name="place_id"><input type="hidden" name="session">
-<label>Restaurant<input name="name" required placeholder="Start typing, e.g. Din Tai Fung"></label>
-<label>Location<input name="location" placeholder="City, district, street or landmark, e.g. Xinyi District, Taipei"></label>
-<button type="submit">Check</button>
-<p class="formerr" role="alert" hidden>Pick a restaurant from the suggestions, or enter a location.</p></form></fieldset>
 <fieldset id="panel-nearby" role="tabpanel" aria-labelledby="tab-nearby"><legend>Restaurants near an address</legend><form id="nearby-form" action="/v1/nearby" method="get" novalidate>
 <input type="hidden" name="format" value="html"><input type="hidden" name="place_id"><input type="hidden" name="session">
 <input type="hidden" name="lat"><input type="hidden" name="lng">
@@ -358,6 +353,12 @@ def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
 <label>Order<select name="sort"><option value="distance">Closest first</option><option value="rating">Highest rated first</option></select></label>
 <button type="submit">Find</button>
 <p class="formerr" role="alert" hidden>Enter an address.</p></form></fieldset>
+<fieldset id="panel-single" role="tabpanel" aria-labelledby="tab-single"><legend>Check one restaurant</legend><form id="verify-form" action="/v1/verify" method="get" novalidate>
+<input type="hidden" name="format" value="html"><input type="hidden" name="place_id"><input type="hidden" name="session">
+<label>Restaurant<input name="name" required placeholder="Start typing, e.g. Din Tai Fung"></label>
+<label>Location<input name="location" placeholder="City, district, street or landmark, e.g. Xinyi District, Taipei"></label>
+<button type="submit">Check</button>
+<p class="formerr" role="alert" hidden>Pick a restaurant from the suggestions, or enter a location.</p></form></fieldset>
 <script>const MAPCFG = {mapcfg};</script>
 <p class="muted">JSON API and docs: <a href="/docs">/docs</a></p></main>{AUTOCOMPLETE_JS}</body></html>"""
 
@@ -554,7 +555,11 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
             else:
                 cells.append(f'<td class="muted">{MISSING.get(r.source_status.get(s, "no_match"), "not found")}</td>')
         if "michelin" in sources:
-            cells.append(f"<td>{escape(r.michelin) if r.michelin else '<span class=muted>–</span>'}</td>")
+            if r.michelin and r.michelin_url:
+                cells.append(f'<td><a href="{escape(r.michelin_url)}" target="_blank" rel="noopener">'
+                             f'{escape(r.michelin)}<span class="sr-only"> (opens in a new tab)</span> ↗</a></td>')
+            else:
+                cells.append(f"<td>{escape(r.michelin) if r.michelin else '<span class=muted>–</span>'}</td>")
         rec = r.recent_3_months
         recent = f"{_fmt(rec.average)}<div class='muted'>{rec.review_count} saved review{'s' if rec.review_count != 1 else ''}{' · low confidence' if rec.low_confidence else ''}</div>"
         dishes = "".join(f'<span class="chip">{escape(d)}</span>' for d in r.top_dishes) or '<span class="muted">not enough reviews yet</span>'
@@ -582,7 +587,7 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
     q = _query_summary(t.query, nearby)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Restaurant ratings</title>{HEAD_ICONS}{STYLE}</head><body><main>
-<h1>{escape(title)}</h1><p class="sub">{escape(q)} · market: {t.market.value.upper()} · <a href="/{'#nearby' if nearby else ''}">new search</a></p>
+<h1>{escape(title)}</h1><p class="sub">{escape(q)} · market: {t.market.value.upper()} · <a href="/{'' if nearby else '#single'}">new search</a></p>
 {_alternatives_block(t)}
 {_map_block(t, maps_key, map_id)}
 <div class="wrap"><table><thead><tr><th>#</th><th>Restaurant</th>{'<th>Distance</th>' if nearby else ''}<th>All time</th>{head}<th>Last 3 months</th><th>Top dishes</th></tr></thead>

@@ -351,10 +351,12 @@ class ReviewService:
                 ratings.append(SourceRating(source=yp.source, source_id=yp.source_id, name=yp.name,
                                             rating=yp.rating, review_count=yp.review_count, url=yp.url))
                 new_reviews += yp.reviews
+        michelin_url = None
         guide = self.michelin.get(market)
         if guide and guide.enabled:
-            if entry := guide.lookup(place.name, place.address):
-                michelin_label = f"{entry.distinction} ({entry.year})" if entry.year else entry.distinction
+            # Only the listed restaurant at this exact place; otherwise nothing is shown.
+            if entry := guide.lookup(place.name, place.address, place.lat, place.lng):
+                michelin_label, michelin_url = entry.label, entry.url or None
 
         # Save what we saw, and compute history-based columns from everything saved so far.
         all_reviews = await self.store.add_reviews(f"google:{place.source_id}", new_reviews)
@@ -374,9 +376,9 @@ class ReviewService:
             all_time_rating=_weighted_rating(ratings),
             recent_3_months=_recent(all_reviews),
             michelin=michelin_label,
+            michelin_url=michelin_url,
             top_dishes=extract_dishes(all_reviews),
-            links=_manual_links(place, market, has_yelp_rating=any(r.source == "yelp" for r in ratings),
-                                in_michelin_list=michelin_label is not None),
+            links=_manual_links(place, market, has_yelp_rating=any(r.source == "yelp" for r in ratings)),
             directions_url=_directions_url(place),
             source_status=status,
             score=_score(ratings),
@@ -390,7 +392,8 @@ class ReviewService:
             "the sites return only a few reviews per request, so it grows more reliable over time.",
             "Top dishes are estimated from phrases in saved reviews.",
         ]
-        notes.append("Michelin status comes from a list maintained with this service; update it after each guide release.")
+        notes.append("Michelin status comes from a list kept with this service and is shown only when the "
+                     "listed restaurant is at this exact address; it links to the Guide's page.")
         if "tripadvisor" in used:
             notes.append("Tripadvisor ratings and reviews © Tripadvisor; follow the rating to see the listing.")
         if market == Market.us and "yelp" not in used:
@@ -431,16 +434,9 @@ def _directions_url(place: Place) -> str:
     return f"https://www.google.com/maps/dir/?{urlencode(params)}"
 
 
-MICHELIN_SEARCH = {Market.us: "https://guide.michelin.com/us/en/search", Market.tw: "https://guide.michelin.com/tw/zh_TW/search"}
-
-
-def _manual_links(place: Place, market: Market, has_yelp_rating: bool, in_michelin_list: bool = False) -> list[Link]:
+def _manual_links(place: Place, market: Market, has_yelp_rating: bool) -> list[Link]:
     """Links the person opens themselves: free, and within each site's normal use."""
     links = []
-    if not in_michelin_list:
-        # Michelin has no API; this searches the Guide's own site for the restaurant.
-        links.append(Link(label="Check Michelin Guide",
-                          url=f"{MICHELIN_SEARCH[market]}?{urlencode({'q': place.name})}"))
     if market == Market.us and not has_yelp_rating:
         # Yelp has little Taiwan coverage; with a paid key the rating is already shown.
         # Street address narrows the search to the right branch; fall back to name only.

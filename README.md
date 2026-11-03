@@ -2,12 +2,14 @@
 
 A small web service that puts a restaurant's ratings from several review sites side by side. It can either:
 
-- **Verify one restaurant**: "Is this place actually good?" The Location can be a city, district, street or landmark ("Xinyi District, Taipei", "Taipei 101"). When a chain has several branches, the one closest to that location is shown, and the others are listed as one-click links.
 - **Restaurants near an address**: the N restaurants closest to an address (default 3, within 1 km), with optional cuisine, price and minimum-rating filters.
 
   The starting point can be an **address**, **cross streets** ("1st St" & "Mission St", San Francisco, or 忠孝東路 & 敦化南路, 台北), or a **point**: click the map to drop a pin (drag it to adjust), search for a spot, or press **Use my location**. The map loads only when that option is chosen, so other page views don't count as Google map loads.
+- **Verify one restaurant**: "Is this place actually good?" The Location can be a city, district, street or landmark ("Xinyi District, Taipei", "Taipei 101"). When a chain has several branches, the one closest to that location is shown, and the others are listed as one-click links.
 
-In both modes Google Maps is the starting point: the restaurants shown are the ones Google returns. Each is then looked up directly on Tripadvisor and checked against the Michelin Guide list, with links to search the Michelin Guide and Yelp sites yourself.
+The home page opens on **Restaurants near an address**; **One restaurant** is the second tab (link straight to it with `/#single`).
+
+In both modes Google Maps is the starting point: the restaurants shown are the ones Google returns. Each is then looked up directly on Tripadvisor and checked against the Michelin Guide list (shown, with a link to its Guide page, only when it's the listed restaurant at that location). US rows also get a link to look the place up on Yelp yourself.
 
 Each result row shows the all-time rating per site, a combined all-time rating, a last-3-months rating, the Michelin status, and the dishes reviewers mention most.
 
@@ -143,6 +145,10 @@ pytest                        # tests mock every external API; no keys needed
 
 Re-run `./deploy.sh` to ship code changes.
 
+### Managing it with Terraform (P1)
+
+After the first deploy, the setup can be managed as code: see [infra/README.md](infra/README.md). From then on, `terraform apply` changes settings and `./ship.sh` ships code. The practice roadmap (P0–P7) is in [docs/ROADMAP.md](docs/ROADMAP.md).
+
 ## Tripadvisor
 
 Tripadvisor retired its old Content API on August 31, 2026; new keys come from its **Terra** platform, which this project uses (`https://terra.tripadvisor.com/api`, key sent in the `X-API-Key` header).
@@ -182,19 +188,20 @@ Tripadvisor retired its old Content API on August 31, 2026; new keys come from i
 
 ## Michelin data (US and Taiwan)
 
-Michelin has no public API, so there's one hand-maintained list per market: `data/michelin_us.csv` and `data/michelin_tw.csv`. Update them after each guide release. The US guide is published as several regional editions on different dates, so the US file will be updated a few times a year.
+Michelin has no public API, so the lists live in `data/michelin_us.csv` (about 1,850 restaurants) and `data/michelin_tw.csv` (about 430). They're built from the public [michelin-my-maps](https://github.com/ngshiheng/michelin-my-maps) dataset, which includes each restaurant's award, position and Guide page. Refresh them after a new guide comes out, then redeploy:
 
-```
-name,name_zh,city,distinction,year
-Example Bistro,,New York|Brooklyn,1 Star,2026
-Example Restaurant,範例餐廳,Taipei|台北|臺北,Bib Gourmand,2026
+```bash
+python scripts/update_michelin.py
 ```
 
+```
+name,name_zh,city,distinction,year,lat,lng,url
+Din Tai Fung (Xinyi Road),,Taipei,Bib Gourmand,,25.03381,121.5322,https://guide.michelin.com/...
+```
+
+- A restaurant gets the Michelin label, linked to its Guide page, only when it's the listed restaurant **at that spot**: same name within 250 m, or, when the names are in different scripts (鼎泰豐 vs Din Tai Fung), the only listed restaurant within 60 m. Other branches of a chain, and namesakes elsewhere, get "–" and no link.
 - `distinction` is one of `3 Stars`, `2 Stars`, `1 Star`, `Bib Gourmand`, `Selected`.
-- `name_zh` is optional; it's there for Taiwan, where Google often returns the Chinese name.
-- `city` must appear in the restaurant's Google address, so a starred "Joe's" in one city doesn't label every "Joe's" elsewhere. List aliases with `|`, and for Taiwan include the Chinese city name, since Google addresses there are usually in Chinese.
-
-Both files ship empty, and the Michelin column shows "–" until you fill them. Redeploy after editing.
+- You can add rows by hand. `lat`/`lng`/`url` are optional; without a position, `city` (aliases separated by `|`, e.g. `Taipei|台北|臺北`) must appear in the restaurant's address.
 
 ## Logs
 

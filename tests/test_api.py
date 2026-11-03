@@ -2,7 +2,9 @@ import json
 
 from httpx import Response
 
-from tests.conftest import DTF_SC, google_place
+import os
+
+from tests.conftest import DTF_SC, FIXTURES, google_place
 
 
 def test_health(make_client):
@@ -33,8 +35,9 @@ def test_nearby_rating_order_and_merges_yelp(make_client, mock_apis):
     # "Big Bowl" is starred in Chicago, not Seattle, so it must not get the label.
     big = next(r for r in data["rows"] if r["name"] == "Big Bowl")
     assert big["michelin"] is None
-    assert big["links"][0]["label"] == "Check Michelin Guide"
-    assert big["links"][0]["url"] == "https://guide.michelin.com/us/en/search?q=Big+Bowl"
+    # No Michelin link when the restaurant isn't listed here; only the free Yelp search remains.
+    assert [l["label"] for l in big["links"]] == ["See on Yelp"]
+    assert top["michelin_url"] == "https://guide.michelin.com/en/test/noodle-house"
     # First call finds the address; the second searches restaurants around it, closest first.
     locate = json.loads(mock_apis.routes[0].calls[0].request.content)
     assert locate == {"textQuery": "Seattle, WA", "pageSize": 1}
@@ -82,7 +85,7 @@ def test_nearby_count_and_html(make_client, mock_apis):
     assert "2 restaurants near 2855 Stevens Creek Blvd" in html
     assert "<th>Distance</th>" in html and "110 m" in html and "0.1 mi" in html
     assert '"center": {"lat": 37.3256' in html and "google.maps.Circle" in html
-    assert "Check Michelin Guide" in html
+    assert "Check Michelin Guide" not in html and "guide.michelin.com" not in html
 
 
 def test_nearby_nothing_within_radius(make_client, mock_apis):
@@ -190,7 +193,7 @@ def test_upstream_error_returns_502(make_client, mock_apis):
 
 
 def test_us_michelin_skipped_when_list_empty(make_client, mock_apis):
-    with make_client(michelin_us="data/michelin_us.csv") as c:
+    with make_client(michelin_us=os.path.join(FIXTURES, "michelin_empty.csv")) as c:
         data = c.get("/v1/nearby", params={"address": "Seattle"}).json()
     assert data["sources_skipped"] == ["tripadvisor", "michelin"]
     assert all(row["michelin"] is None for row in data["rows"])

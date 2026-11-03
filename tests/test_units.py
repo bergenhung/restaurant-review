@@ -191,3 +191,21 @@ def test_tripadvisor_cap_holds_when_lookups_overlap():
     assert SlowClient.calls == 2          # only two 2-item searches fit within 5
     assert statuses.count("limit") == 4
     assert ta.spent_today <= 5
+
+
+def test_michelin_only_at_the_listed_place(tmp_path):
+    from app.sources.michelin import Michelin
+    f = tmp_path / "m.csv"
+    f.write_text("name,name_zh,city,distinction,year,lat,lng,url\n"
+                 "Din Tai Fung (Xinyi Road),,Taipei,Bib Gourmand,,25.03381,121.5322,https://guide.michelin.com/x\n"
+                 "Old Style,,Taipei,Selected,,25.0400,121.5400,https://guide.michelin.com/y\n", encoding="utf-8")
+    m = Michelin(str(f))
+    # The listed branch, by English name or (different script) by position.
+    assert m.lookup("Din Tai Fung", "", 25.0339, 121.5322).url == "https://guide.michelin.com/x"
+    assert m.lookup("鼎泰豐 信義店", "", 25.0338, 121.5322).distinction == "Bib Gourmand"
+    # Same chain, another branch 3 km away: no label, no link.
+    assert m.lookup("Din Tai Fung", "Taipei 101", 25.0336, 121.5650) is None
+    # Same script, different name, same spot: not matched by position.
+    assert m.lookup("Big Bowl", "", 25.03381, 121.5322) is None
+    # No position and no address to confirm the city: not claimed.
+    assert m.lookup("Din Tai Fung") is None
