@@ -48,6 +48,10 @@ ENUM_TO_PRICE = {v: k for k, v in PRICE_TO_ENUM.items()}
 LANG = {Market.us: ("en", "US"), Market.tw: ("zh-TW", "TW")}
 
 
+class AmbiguousLocation(Exception):
+    """The text didn't pin down one place, e.g. cross streets that matched only a street elsewhere."""
+
+
 class GooglePlaces:
     name = "google"
 
@@ -213,8 +217,18 @@ class GooglePlaces:
         if not address:
             return None
         if is_intersection(address):
-            if found := await self.geocode(address, region):
-                return found
+            data = await self._geocoding({"address": address, "key": self.api_key,
+                                          **({"region": region.lower()} if region else {})})
+            if data:
+                r = data["results"][0]
+                if "intersection" not in r.get("types", []):
+                    # "Broadway & Columbus" -> "Broadway, Columbus, OH": Google found a street, not a corner.
+                    raise AmbiguousLocation(
+                        f"Couldn't find the corner '{address}'; the closest match was "
+                        f"{r.get('formatted_address', 'somewhere else')}. Add the city, e.g. "
+                        f"'Broadway & Columbus Ave, San Francisco, CA'.")
+                loc = r["geometry"]["location"]
+                return loc["lat"], loc["lng"], r.get("formatted_address") or address
         resp = await self.client.post(
             SEARCH_URL, json={"textQuery": address, "pageSize": 1, **({"regionCode": region} if region else {})},
             headers={**headers, "X-Goog-FieldMask": "places.location,places.formattedAddress"},
