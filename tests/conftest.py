@@ -143,7 +143,11 @@ def _ta_search(req):
         ],
         "Far Away Ramen": [ta_location(600, ["Far Away Ramen"], lat=40.71, lng=-74.0)],
     }.get(q, [])
-    return Response(200, json={"data": results[: int(req.url.params.get("size", 20))]})
+    # Terra wraps each search result: {"location": {...}, "matched_value": {...}}.
+    data = [{"location": r, "matched_value": {"value": q, "locale": "en-US"}}
+            for r in results[: int(req.url.params.get("size", 20))]]
+    return Response(200, json={"data": data, "pagination": {"page": 1, "size": len(data),
+                                                            "total_elements": len(data), "total_pages": 1}})
 
 
 def _ta_nearby(req):

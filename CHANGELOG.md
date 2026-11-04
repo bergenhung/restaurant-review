@@ -2,6 +2,21 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-03 (Tripadvisor matching)
+
+### Fixed
+- **Tripadvisor found nothing for any restaurant.** Terra wraps each search result as
+  `{"location": {...}, "matched_value": {...}}`; the app read the name, ID and position from the outer
+  level, where they don't exist, so every result looked empty (seen in the log as
+  `id: null, names: []`). Results are now unwrapped, names can also be a locale map
+  (`{"en-US": "..."}`), and the ID can be `id` or `location_id`. Details and reviews accept the same
+  wrapping. (`app/sources/tripadvisor.py`)
+- **Wrong postal code on Google:** if a name search narrowed to Google's postal code finds nothing
+  (Mona Lisa: Google 94123, Tripadvisor 94133), it's tried once more without it; the result must then
+  be near Google's pin. An empty answer isn't billed.
+- Remembered "not found" results are checked again, and a no-match log now also lists each
+  candidate's field names, so a format change is easy to spot.
+
 ## 2026-11-03 (summary placement)
 
 ### Changed

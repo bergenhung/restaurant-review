@@ -833,3 +833,27 @@ def test_one_restaurant_results_have_the_search_filled_in(make_client, mock_apis
         html = c.get("/v1/verify", params={"name": "Noodle House", "location": "Seattle", "format": "html"}).text
     assert 'action="/v1/verify"' in html and 'name="name" value="Noodle House"' in html
     assert 'name="location" value="Seattle"' in html
+
+
+def test_tripadvisor_postal_code_off_retries_by_name(make_client, mock_apis):
+    """Mona Lisa: Google says 94123, Tripadvisor 94133. The postal-code search finds nothing, so the
+    name search runs again without it, and the result near Google's pin is taken."""
+    from tests.conftest import ta_location
+    seen = []
+
+    def search(req):
+        seen.append(dict(req.url.params))
+        if req.url.params.get("postal_code"):
+            return Response(200, json={"data": [], "pagination": {"total_elements": 0}})
+        loc = ta_location(4242, [], lat=47.6002, lng=-122.3002)
+        loc["names"] = {"en-US": "Noodle House"}  # names as a locale map
+        return Response(200, json={"data": [{"location": loc, "matched_value": {"value": "Noodle House"}}]})
+
+    mock_apis.routes[8].mock(side_effect=search)
+    mock_apis.routes[0].mock(return_value=Response(200, json={"places": [
+        google_place("g1", "Noodle House", 4.6, 1800, address="1 Main St, Seattle, WA 98123, USA")]}))
+    with make_client(ta_key="k", yelp_key="") as c:
+        row = c.get("/v1/nearby", params={"address": "Seattle", "count": 1}).json()["rows"][0]
+    assert [p.get("postal_code") for p in seen] == ["98123", None]
+    ta = next(r for r in row["ratings"] if r["source"] == "tripadvisor")
+    assert ta["source_id"] == "4242" and row["source_status"]["tripadvisor"] == "matched"

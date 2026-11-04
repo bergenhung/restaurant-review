@@ -46,7 +46,7 @@ EXACT_NAME = 0.9
 SAME_SPOT_KM = 0.03
 LOCATION_ID_TTL_HOURS = 24 * 30
 NO_MATCH_TTL_HOURS = 24 * 7
-MATCH_RULES_VERSION = 2  # bump when matching improves, so remembered no-matches are retried
+MATCH_RULES_VERSION = 3  # bump when matching improves, so remembered no-matches are retried
 REVIEW_LANGUAGE = {Market.us: "en", Market.tw: "primary"}  # "primary" = as written, so local reviews
 # Terra wants region-specific locales: "en-US", not "en" (which it rejects with a 400).
 NAME_LOCALES = {Market.us: ["en-US"], Market.tw: ["zh-TW", "en-US"]}
@@ -147,6 +147,10 @@ class Tripadvisor:
                     location = await self._get(f"/locations/{location_id}", self._locale_params(market), 1, "details")
                     if not location:
                         return None, "error"
+                    # Accept the location as-is, inside "data", or wrapped like search results.
+                    if isinstance(location.get("data"), dict):
+                        location = location["data"]
+                    location = unwrap(location)
                 place = _to_place(location_id, location)
                 await self.store.set_cached(summary_key, place.model_dump(mode="json", exclude={"reviews"}),
                                             SUMMARY_TTL_HOURS)
@@ -169,7 +173,9 @@ class Tripadvisor:
             except BudgetExhausted:
                 reviews = None  # keep the rating we already have; try reviews another day
             if reviews is not None:
-                place.reviews = [r for r in (_to_review(x) for x in reviews.get("data", [])) if r]
+                items = [x.get("review") if isinstance(x, dict) and isinstance(x.get("review"), dict) else x
+                         for x in reviews.get("data") or []]
+                place.reviews = [r for r in (_to_review(x) for x in items) if r]
                 await self.store.set_cached(reviews_key, {"fetched": True}, REVIEWS_EVERY_HOURS)
         return place, "matched"
 
@@ -184,6 +190,8 @@ class Tripadvisor:
             log.warning("tripadvisor rejected the locale; retrying without it", extra={"kind": kind})
             self._locale_ok = False
             found = await self._get(path, params, size, kind)
+        if found is not None:
+            found["data"] = [unwrap(r) for r in found.get("data") or []]
         return found
 
     async def _locate(self, google_place_id, name, lat, lng, market, address) -> tuple[str, str, dict | None]:
@@ -206,6 +214,13 @@ class Tripadvisor:
         if postal:
             params.append(("postal_code", postal))
         found = await self._search("/locations/search", params, market, "search", NAME_SEARCH_SIZE)
+        if found is not None and postal and not found.get("data"):
+            # Nothing under that postal code: Google's can be off (Mona Lisa on Columbus Ave is listed
+            # under 94123, Tripadvisor has 94133). Try once more by name in the country; an empty
+            # answer costs nothing, and the results must then be near Google's pin.
+            postal = ""
+            params = [p for p in params if p[0] != "postal_code"]
+            found = await self._search("/locations/search", params, market, "search", NAME_SEARCH_SIZE)
         if found is None:
             errored = True
         else:
@@ -224,15 +239,15 @@ class Tripadvisor:
             else:
                 best = match(name, found.get("data", []))
 
-        location_id = str(best["id"]) if best and best.get("id") is not None else ""
+        location_id = _id(best) if best else ""
         if not location_id:
             if errored:
                 return "error", "", None  # not a confirmed no-match, so don't remember it
             log.info("tripadvisor no match", extra={
                 "restaurant": name, "postal_code": postal, "google_lat": lat, "google_lng": lng,
                 # What Tripadvisor offered, so a wrong "not found" can be diagnosed from the log.
-                "candidates": [{"id": c.get("id"), "names": _names(c)[:3], "coords": _coords(c)}
-                               for c in name_results][:5],
+                "candidates": [{"id": _id(c), "names": _names(c)[:3], "coords": _coords(c),
+                                "keys": sorted(c)[:15]} for c in name_results][:5],
             })
         await self.store.set_cached(key, {"location_id": location_id, "v": MATCH_RULES_VERSION},
                                     LOCATION_ID_TTL_HOURS if location_id else NO_MATCH_TTL_HOURS)
@@ -322,18 +337,39 @@ def _has_cjk(text: str) -> bool:
     return any("\u4e00" <= ch <= "\u9fff" for ch in text)
 
 
+def _id(loc: dict) -> str:
+    for k in ("id", "location_id", "locationId"):
+        if loc.get(k) not in (None, ""):
+            return str(loc[k])
+    return ""
+
+
+def unwrap(item: dict) -> dict:
+    """Search results come as {"location": {...}, "matched_value": {...}}: the restaurant is inside
+    "location". Anything else on the outer level (e.g. a distance) is kept alongside it."""
+    if not isinstance(item, dict) or not isinstance(item.get("location"), dict):
+        return item
+    loc = dict(item["location"])
+    for k, v in item.items():
+        if k == "matched_value":
+            loc["_matched"] = v  # the name text the search matched on
+        elif k != "location":
+            loc.setdefault(k, v)
+    return loc
+
+
 def _names(loc: dict) -> list[str]:
     out = []
-    for key in ("names", "name"):
+    for key in ("names", "name", "_matched"):
         v = loc.get(key)
         items = v if isinstance(v, list) else [v]
         for item in items:
             if isinstance(item, str):
                 out.append(item)
             elif isinstance(item, dict):
-                for k in ("value", "name", "text", "localized_name"):
-                    if isinstance(item.get(k), str):
-                        out.append(item[k])
+                found = [item[k] for k in ("value", "name", "text", "localized_name") if isinstance(item.get(k), str)]
+                # Or a map of locale -> name: {"en-US": "Bouche", "zh-TW": "..."}
+                out += found or [x for x in item.values() if isinstance(x, str) and not x.startswith("http")]
     return [n for n in out if n]
 
 
