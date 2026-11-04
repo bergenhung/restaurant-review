@@ -4,10 +4,10 @@ A small web service that puts a restaurant's ratings from several review sites s
 
 - **Restaurants near an address**: the N restaurants closest to an address (default 3, within 1 km), with optional cuisine, price and minimum-rating filters.
 
-  The starting point can be an **address**, **cross streets** ("1st St" & "Mission St", San Francisco, or 忠孝東路 & 敦化南路, 台北), or a **point**: click the map to drop a pin (drag it to adjust), search for a spot, or press **Use my location**. The map loads only when that option is chosen, so other page views don't count as Google map loads.
+  The starting point can be **cross streets** (the default: "1st St" & "Mission St", San Francisco, or 忠孝東路 & 敦化南路, 台北), an **address**, or a **point**: click the map to drop a pin (drag it to adjust), search for a spot, or press **Use my location**. The map loads only when that option is chosen, so other page views don't count as Google map loads.
 - **Verify one restaurant**: "Is this place actually good?" The Location can be a city, district, street or landmark ("Xinyi District, Taipei", "Taipei 101"). When a chain has several branches, the one closest to that location is shown, and the others are listed as one-click links.
 
-Price ($ to $$$$) is based on the top of each restaurant's price range per person: up to $20 / $30 / $100 / more in the US, NT$200 / 500 / 1,500 / more in Taiwan, with Google's own level when there is no range. Results pages show the search as a filled-in form, so a filter can be changed without starting over. The home page opens on **Restaurants near an address**; **One restaurant** is the second tab (link straight to it with `/#single`).
+Price ($ to $$$$) is based on the top of each restaurant's price range per person, using one base amount per currency: $ up to the base, $$ up to 2x, $$$ up to 5x, $$$$ above. That's $20 / $40 / $100 in the US and NT$300 / 600 / 1,500 in Taiwan, with Google's own level when there is no range. Results pages show the search as a filled-in form, so a filter can be changed without starting over. The home page opens on **Restaurants near an address**; **One restaurant** is the second tab (link straight to it with `/#single`).
 
 In both modes Google Maps is the starting point: the restaurants shown are the ones Google returns. Each is then looked up directly on Tripadvisor and checked against the Michelin Guide list (shown, with a link to its Guide page, only when it's the listed restaurant at that location). US rows also get a link to look the place up on Yelp yourself.
 

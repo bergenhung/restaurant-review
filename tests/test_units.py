@@ -238,8 +238,11 @@ def test_price_level_from_top_of_range():
                                **({"endPrice": {"currencyCode": "USD", "units": str(hi)}} if hi else {})}
     twd = lambda lo, hi=None: {"startPrice": {"currencyCode": "TWD", "units": str(lo)},
                                **({"endPrice": {"currencyCode": "TWD", "units": str(hi)}} if hi else {})}
-    assert [_level_from_range(usd(*r)) for r in [(10, 20), (20, 30), (30, 50), (30, 90), (50, 100), (100,)]] == [1, 2, 3, 3, 3, 4]
-    assert [_level_from_range(twd(*r)) for r in [(1, 200), (200, 400), (400, 600), (1000,)]] == [1, 2, 3, 4]
+    # $ = up to the base ($20), $$ up to 2x ($40), $$$ up to 5x ($100), $$$$ above.
+    assert [_level_from_range(usd(*r)) for r in [(10, 20), (20, 30), (30, 40), (30, 50), (30, 90), (50, 100),
+                                                 (100, 150), (100,)]] == [1, 2, 2, 3, 3, 3, 4, 4]
+    # Taiwan base NT$300: NT$300 / 600 / 1,500.
+    assert [_level_from_range(twd(*r)) for r in [(1, 200), (200, 400), (400, 600), (600, 800), (1000,)]] == [1, 2, 2, 3, 4]
     assert _level_from_range(None) is None
     assert _level_from_range({"startPrice": {"currencyCode": "EUR", "units": "20"}}) is None  # Google's level is used
 

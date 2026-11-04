@@ -393,17 +393,20 @@ def _google_levels(levels: list[int]) -> list[str]:
 
 # $ to $$$$ from the top of Google's price range per person (what a full meal tends to cost), e.g.
 # "$30–90" -> $$$. Google's own price level often sits lower ("Moderate" for that same place), so
-# it's used only when a place has no range. Top-of-range limits for $, $$ and $$$; above is $$$$.
-LEVEL_LIMITS = {"USD": (20, 30, 100), "TWD": (200, 500, 1500)}
+# it's used only when a place has no range.
+# The rule: one base amount ("$") per currency; $$ is up to 2x the base, $$$ up to 5x, $$$$ above.
+PRICE_BASE = {"USD": 20, "TWD": 300}
+PRICE_MULTIPLES = (1, 2, 5)  # top-of-range limits for $, $$ and $$$, as multiples of the base
 
 
 def _level_from_range(pr: dict | None) -> int | None:
     if not pr or not pr.get("startPrice"):
         return None
     start, end = pr["startPrice"], pr.get("endPrice") or {}
-    limits = LEVEL_LIMITS.get(start.get("currencyCode", ""))
-    if not limits:
+    base = PRICE_BASE.get(start.get("currencyCode", ""))
+    if not base:
         return None
+    limits = [base * m for m in PRICE_MULTIPLES]
     try:
         top = int(end["units"]) if end.get("units") else None
     except (TypeError, ValueError):

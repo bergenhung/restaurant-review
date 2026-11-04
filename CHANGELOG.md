@@ -2,22 +2,31 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-03 (start point)
+
+### Changed
+- **Cross streets is the default starting point** on the "Restaurants near an address" tab, and
+  the first option (then Map or my location, then Address). After the browser's Back button, the
+  fields for whichever option is selected are shown. (`app/render.py`)
+
 ## 2026-11-03 (price levels)
 
 ### Changed
 - **$ to $$$$ now follows the top of each restaurant's price range per person**, which reflects a
   full meal better than Google's own level. Tosca Cafe ($30–90) shows as $$$ instead of Google's $$.
+  The rule: one base amount ("$") per currency; $$ is up to 2x the base, $$$ up to 5x, $$$$ above.
 
-  | Shown | US (top of range) | Taiwan (top of range) |
-  |---|---|---|
-  | $ | up to $20 | up to NT$200 |
-  | $$ | up to $30 | up to NT$500 |
-  | $$$ | up to $100 | up to NT$1,500 |
-  | $$$$ | more, or "$100+" | more, or "NT$1,000+" |
+  | Shown | Rule | US (base $20) | Taiwan (base NT$300) |
+  |---|---|---|---|
+  | $ | up to 1x base | up to $20 | up to NT$300 |
+  | $$ | up to 2x | up to $40 | up to NT$600 |
+  | $$$ | up to 5x | up to $100 | up to NT$1,500 |
+  | $$$$ | more than 5x, or open-ended ("$100+") | over $100 | over NT$1,500 |
 
   Places without a range keep Google's level. The price filter uses the same rule (Google is asked
-  for one level lower too, since its level can sit below this one). Limits are `LEVEL_LIMITS` in
-  `app/sources/google_places.py`. Cached results from before aren't reused.
+  for one level lower too, since its level can sit below this one). The base amounts and multiples
+  are `PRICE_BASE` and `PRICE_MULTIPLES` in `app/sources/google_places.py`. Cached results from
+  before aren't reused.
 
 ## 2026-11-03 (later)
 

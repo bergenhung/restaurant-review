@@ -205,13 +205,15 @@ AUTOCOMPLETE_JS = r"""
   const radios = [...nf.querySelectorAll("input[name=start]")];
   const panes = [...nf.querySelectorAll(".startpane")];
   const pinStatus = document.getElementById("pinstatus");
-  let startMode = "address";
+  let startMode = "cross";  // the default; matches the radio checked in the HTML
   function setStart(mode) {
     startMode = mode; nErr.hidden = true;
     panes.forEach(p => { p.hidden = p.dataset.start !== mode; });
     if (mode === "map") openPickMap();
   }
   radios.forEach(r => r.addEventListener("change", () => setStart(r.value)));
+  // After the browser's Back button the previously picked option may be restored: show its fields.
+  window.addEventListener("pageshow", () => { const r = radios.find(x => x.checked); if (r && r.value !== startMode) setStart(r.value); });
   attach(x3, "location", (s) => { x3.value = s.text || s.main; });
 
   let pickMap = null, pickPin = null, pendingPin = null, mapLoading = false;
@@ -403,14 +405,14 @@ def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
 <input type="hidden" name="format" value="html"><input type="hidden" name="place_id"><input type="hidden" name="session">
 <input type="hidden" name="lat"><input type="hidden" name="lng">
 <div class="start wide" role="radiogroup" aria-label="Start from"><span class="muted">Start from</span>
-<label class="pill"><input type="radio" name="start" value="address" checked> Address</label>
-<label class="pill"><input type="radio" name="start" value="cross"> Cross streets</label>
-<label class="pill"><input type="radio" name="start" value="map"> Map or my location</label></div>
-<div class="startpane wide" data-start="address"><label>Address<input name="address" required placeholder="Start typing, e.g. 2855 Stevens Creek Blvd, Santa Clara"></label></div>
-<div class="startpane wide grid3" data-start="cross" hidden>
+<label class="pill"><input type="radio" name="start" value="cross" checked> Cross streets</label>
+<label class="pill"><input type="radio" name="start" value="map"> Map or my location</label>
+<label class="pill"><input type="radio" name="start" value="address"> Address</label></div>
+<div class="startpane wide grid3" data-start="cross">
 <label>Street<input id="x1" placeholder="e.g. 1st St / 忠孝東路"></label>
 <label>Cross street<input id="x2" placeholder="e.g. Mission St / 敦化南路"></label>
 <label>City<input id="x3" placeholder="e.g. San Francisco, CA / 台北"></label></div>
+<div class="startpane wide" data-start="address" hidden><label>Address<input name="address" required placeholder="Start typing, e.g. 2855 Stevens Creek Blvd, Santa Clara"></label></div>
 <div class="startpane wide" data-start="map" hidden>
 <div class="maptools"><label>Find a spot<input id="mapfind" placeholder="Address, landmark or cross streets, then pick or press Enter"></label>
 <button type="button" id="mylocation" class="secondary">Use my location</button></div>
@@ -418,7 +420,7 @@ def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
 <p class="muted" id="pinstatus" aria-live="polite">Click the map to drop a pin (drag it to adjust), find a spot, or use your location.</p></div>
 {filter_fields()}
 <button type="submit">Find</button>
-<p class="formerr" role="alert" hidden>Enter an address.</p></form></fieldset>
+<p class="formerr" role="alert" hidden>Enter the cross streets.</p></form></fieldset>
 <fieldset id="panel-single" role="tabpanel" aria-labelledby="tab-single"><legend>Check one restaurant</legend><form id="verify-form" action="/v1/verify" method="get" novalidate>
 <input type="hidden" name="format" value="html"><input type="hidden" name="place_id"><input type="hidden" name="session">
 <label>Restaurant<input name="name" required placeholder="Start typing, e.g. Din Tai Fung"></label>
