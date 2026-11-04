@@ -54,7 +54,8 @@ button.secondary{background:transparent;color:var(--accent);border:1px solid var
 .editbar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 18px;
   grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
 .editbar .startfield{grid-column:span 2}@media (max-width:560px){.editbar .startfield{grid-column:1/-1}}
-.summary{margin:6px 0;max-width:46ch;font-size:.92em;line-height:1.4}
+.summary{margin:6px 0 0;font-size:.92em;line-height:1.4}
+td.dishes{min-width:240px;max-width:340px}
 .wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:760px}
 th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:13px;color:var(--muted);font-weight:600}
 tr[data-idx]{cursor:pointer}tr.active td{background:var(--hl)}
@@ -636,7 +637,8 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
         else:
             recent = (f"{_fmt(rec.average)}<div class='muted'>{n} review{'s' if n != 1 else ''}"
                       f"{' · low confidence' if rec.low_confidence else ''}</div>")
-        dishes = "".join(f'<span class="chip">{escape(d)}</span>' for d in r.top_dishes) or '<span class="muted">not enough reviews yet</span>'
+        dishes = "".join(f'<span class="chip">{escape(d)}</span>' for d in r.top_dishes) or (
+            "" if r.review_summary else '<span class="muted">not enough reviews yet</span>')
         summary = ""
         if r.review_summary:
             rs = r.review_summary
@@ -656,9 +658,9 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
         idx_attr = f' data-idx="{i}"' if r.lat is not None else ""
         body.append(
             f"<tr{idx_attr}><td><span class='rank'>{r.rank or i + 1}</span></td><td><strong>{escape(r.name)}</strong><div class='muted'>{escape(r.address)}</div>"
-            f"<div class='muted'>{escape(meta)}</div>{_hours_html(r)}{summary}{extra}</td>{_distance_cell(r.distance_km) if nearby else ''}"
+            f"<div class='muted'>{escape(meta)}</div>{_hours_html(r)}{extra}</td>{_distance_cell(r.distance_km) if nearby else ''}"
             f"<td><strong>{_fmt(r.all_time_rating, 2)}</strong></td>"
-            f"{''.join(cells)}<td>{recent}</td><td>{dishes}</td></tr>"
+            f"{''.join(cells)}<td>{recent}</td><td class='dishes'>{dishes}{summary}</td></tr>"
         )
     notes = "".join(f"<li>{escape(n)}</li>" for n in t.notes)
     if t.tripadvisor_usage:
@@ -673,5 +675,5 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
 {_edit_bar(t, nearby)}
 {_alternatives_block(t)}
 {_map_block(t, maps_key, map_id)}
-<div class="wrap"><table><thead><tr><th>#</th><th>Restaurant</th>{'<th>Distance</th>' if nearby else ''}<th>All time</th>{head}<th>Last 3 months</th><th>Top dishes</th></tr></thead>
+<div class="wrap"><table><thead><tr><th>#</th><th>Restaurant</th>{'<th>Distance</th>' if nearby else ''}<th>All time</th>{head}<th>Last 3 months</th><th>Top dishes &amp; what diners say</th></tr></thead>
 <tbody>{''.join(body)}</tbody></table></div><ul class="notes">{notes}</ul></main></body></html>"""

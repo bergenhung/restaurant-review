@@ -2,6 +2,13 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-03 (summary placement)
+
+### Changed
+- **Google's review summary moved under Top dishes**, in a column now called "Top dishes & what
+  diners say": the dishes as chips, then the summary with its "Summarized with Gemini" note and link.
+  The restaurant column is back to name, address, price, hours and links. (`app/render.py`)
+
 ## 2026-11-03 (start point)
 
 ### Changed
