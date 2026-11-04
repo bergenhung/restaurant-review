@@ -785,7 +785,8 @@ def test_nearby_finds_the_closest_matching_restaurants(make_client, mock_apis):
     texts = [json.loads(c.request.content) for c in mock_apis.routes[0].calls]
     area = [b for b in texts if b.get("textQuery") == "restaurant"]
     assert len(area) == 1  # only the 3-restaurant request needed the top-up
-    assert area[0]["priceLevels"] == ["PRICE_LEVEL_EXPENSIVE"] and area[0]["minRating"] == 4.0
+    # One level lower is asked for too: Google's own level can be below the one shown here.
+    assert area[0]["priceLevels"] == ["PRICE_LEVEL_MODERATE", "PRICE_LEVEL_EXPENSIVE"] and area[0]["minRating"] == 4.0
 
 
 def test_review_summary_shown_with_attribution(make_client, mock_apis):

@@ -23,7 +23,7 @@ TW_HINTS = (
 )
 RECENT_DAYS = 90
 # Part of every cached result's key: bump it when results are built differently, so old ones aren't reused.
-RESULTS_VERSION = 2
+RESULTS_VERSION = 3
 REGION = {Market.us: "US", Market.tw: "TW"}
 BRANCH_SEARCH_RADIUS_M = 20000  # look for branches around the typed location
 MAX_ALTERNATIVES = 4
@@ -424,6 +424,8 @@ class ReviewService:
             f"Tripadvisor a few more, so it's shown only once there are at least {MIN_RECENT_TO_SHOW}.",
             "Top dishes come from Google's review summary where there is one, and from dishes at least two "
             "reviewers mention.",
+            "Price ($ to $$$$) follows the top of each place's price range per person: up to $20, $30, $100, "
+            "or more (Taiwan: NT$200, NT$500, NT$1,500, or more). Google's own level is used when there's no range.",
         ]
         notes.append("Michelin status comes from a list kept with this service and is shown only when the "
                      "listed restaurant is at this exact address; it links to the Guide's page.")

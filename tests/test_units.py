@@ -229,3 +229,29 @@ def test_tripadvisor_exact_name_wins_over_similar():
     # Narrowed to the postal code; no coordinates in the results: the exact name is taken.
     assert match_by_name("Bouche", [bouchon, bouche], None, None, narrowed=True) is bouche
     assert match_by_name("Bouche", [bouchon], None, None, narrowed=True) is bouchon  # only a similar name
+
+
+def test_price_level_from_top_of_range():
+    """Tosca Cafe: Google says $$ but its range is $30–90 per person, so it's shown and filtered as $$$."""
+    from app.sources.google_places import _level_from_range
+    usd = lambda lo, hi=None: {"startPrice": {"currencyCode": "USD", "units": str(lo)},
+                               **({"endPrice": {"currencyCode": "USD", "units": str(hi)}} if hi else {})}
+    twd = lambda lo, hi=None: {"startPrice": {"currencyCode": "TWD", "units": str(lo)},
+                               **({"endPrice": {"currencyCode": "TWD", "units": str(hi)}} if hi else {})}
+    assert [_level_from_range(usd(*r)) for r in [(10, 20), (20, 30), (30, 50), (30, 90), (50, 100), (100,)]] == [1, 2, 3, 3, 3, 4]
+    assert [_level_from_range(twd(*r)) for r in [(1, 200), (200, 400), (400, 600), (1000,)]] == [1, 2, 3, 4]
+    assert _level_from_range(None) is None
+    assert _level_from_range({"startPrice": {"currencyCode": "EUR", "units": "20"}}) is None  # Google's level is used
+
+
+def test_tosca_shows_as_three_dollars(make_client, mock_apis):
+    from httpx import Response
+    from tests.conftest import google_place
+    p = google_place("tc", "Tosca Cafe", 4.4, 2100, price="PRICE_LEVEL_MODERATE")
+    p["priceRange"] = {"startPrice": {"currencyCode": "USD", "units": "30"}, "endPrice": {"currencyCode": "USD", "units": "90"}}
+    mock_apis.routes[0].mock(return_value=Response(200, json={"places": [p]}))
+    with make_client(yelp_key="") as c:
+        rows = c.get("/v1/nearby", params={"address": "Seattle", "price": "$$$"}).json()["rows"]
+        none = c.get("/v1/nearby", params={"address": "Seattle", "price": "$$"})
+    assert rows[0]["price"] == "$$$" and rows[0]["price_range"] == "$30–90"
+    assert none.status_code == 404  # not $$ any more

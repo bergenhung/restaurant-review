@@ -92,7 +92,7 @@ class GooglePlaces:
             }}
             body["rankPreference"] = "DISTANCE"
         if price_levels:
-            body["priceLevels"] = [PRICE_TO_ENUM[p] for p in price_levels if p in PRICE_TO_ENUM]
+            body["priceLevels"] = _google_levels(price_levels)
         if min_rating:
             body["minRating"] = min_rating
         resp = await self.client.post(
@@ -155,7 +155,7 @@ class GooglePlaces:
             }},
         }
         if price_levels:
-            body["priceLevels"] = [PRICE_TO_ENUM[p] for p in price_levels if p in PRICE_TO_ENUM]
+            body["priceLevels"] = _google_levels(price_levels)
         if min_rating:
             body["minRating"] = min_rating
         places: list[Place] = []
@@ -333,7 +333,7 @@ class GooglePlaces:
             source_id=p["id"],
             name=(p.get("displayName") or {}).get("text", ""),
             address=p.get("formattedAddress", ""),
-            price_level=ENUM_TO_PRICE.get(p.get("priceLevel", "")),
+            price_level=_level_from_range(p.get("priceRange")) or ENUM_TO_PRICE.get(p.get("priceLevel", "")),
             cuisine=(p.get("primaryTypeDisplayName") or {}).get("text"),
             rating=p.get("rating"),
             review_count=p.get("userRatingCount"),
@@ -382,6 +382,38 @@ def _price_range(pr: dict | None) -> str | None:
     if end.get("units"):
         return f"{sym}{lo}–{int(end['units']):,}"
     return f"{sym}{lo}+"
+
+
+def _google_levels(levels: list[int]) -> list[str]:
+    """Google filters on its own levels, which can be one lower than this app's (Tosca: Google $$,
+    here $$$). Ask for one level lower as well; the exact level is checked after the results arrive."""
+    wanted = sorted({x for lv in levels for x in (lv - 1, lv) if 1 <= x <= 4})
+    return [PRICE_TO_ENUM[x] for x in wanted]
+
+
+# $ to $$$$ from the top of Google's price range per person (what a full meal tends to cost), e.g.
+# "$30–90" -> $$$. Google's own price level often sits lower ("Moderate" for that same place), so
+# it's used only when a place has no range. Top-of-range limits for $, $$ and $$$; above is $$$$.
+LEVEL_LIMITS = {"USD": (20, 30, 100), "TWD": (200, 500, 1500)}
+
+
+def _level_from_range(pr: dict | None) -> int | None:
+    if not pr or not pr.get("startPrice"):
+        return None
+    start, end = pr["startPrice"], pr.get("endPrice") or {}
+    limits = LEVEL_LIMITS.get(start.get("currencyCode", ""))
+    if not limits:
+        return None
+    try:
+        top = int(end["units"]) if end.get("units") else None
+    except (TypeError, ValueError):
+        return None
+    if top is None:  # "$100+", "NT$1,000+": Google's open-ended top bracket
+        return 4
+    for level, limit in enumerate(limits, 1):
+        if top <= limit:
+            return level
+    return 4
 
 
 def _has_cjk(text: str) -> bool:

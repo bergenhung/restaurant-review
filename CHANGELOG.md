@@ -2,6 +2,23 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-03 (price levels)
+
+### Changed
+- **$ to $$$$ now follows the top of each restaurant's price range per person**, which reflects a
+  full meal better than Google's own level. Tosca Cafe ($30–90) shows as $$$ instead of Google's $$.
+
+  | Shown | US (top of range) | Taiwan (top of range) |
+  |---|---|---|
+  | $ | up to $20 | up to NT$200 |
+  | $$ | up to $30 | up to NT$500 |
+  | $$$ | up to $100 | up to NT$1,500 |
+  | $$$$ | more, or "$100+" | more, or "NT$1,000+" |
+
+  Places without a range keep Google's level. The price filter uses the same rule (Google is asked
+  for one level lower too, since its level can sit below this one). Limits are `LEVEL_LIMITS` in
+  `app/sources/google_places.py`. Cached results from before aren't reused.
+
 ## 2026-11-03 (later)
 
 ### Added
