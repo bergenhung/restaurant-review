@@ -17,9 +17,13 @@ import {
 }
 
 import {
-  for_each = var.secrets
-  to       = google_secret_manager_secret.app[each.key]
-  id       = "projects/${var.project_id}/secrets/${each.value}"
+  to = google_secret_manager_secret.app["GOOGLE_PLACES_API_KEY"]
+  id = "projects/${var.project_id}/secrets/google-places-api-key"
+}
+
+import {
+  to = google_secret_manager_secret.app["TRIPADVISOR_API_KEY"]
+  id = "projects/${var.project_id}/secrets/tripadvisor-api-key"
 }
 
 import {

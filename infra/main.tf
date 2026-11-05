@@ -140,6 +140,8 @@ resource "google_cloud_run_v2_service" "app" {
     }
 
     containers {
+      # The name gcloud gave the container on the first deploy; keeping it avoids a needless change.
+      name = "${var.service}-1"
       # Placeholder only: ship.sh deploys the real image, and Terraform ignores it (see lifecycle below).
       image = "us-docker.pkg.dev/cloudrun/container/hello"
 

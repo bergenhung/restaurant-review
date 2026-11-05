@@ -2,6 +2,13 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-04 (P1 Terraform, ready to run)
+
+### Changed
+- `infra/`: brought in line with the live service: container name `restaurant-review-1` (as gcloud
+  named it), Terraform 1.6+ (secret imports written out instead of a loop), and a "Before you start"
+  checklist in `infra/README.md` (map key, existing budget).
+
 ## 2026-11-04 (city first)
 
 ### Changed

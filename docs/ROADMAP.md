@@ -7,7 +7,7 @@ you can then see what each one costs.
 | ID | Label | Project | What you practise | Expected cost |
 |---|---|---|---|---|
 | P0 | `p0-app` | The restaurant review service on Cloud Run (done) | Cloud Run, Firestore, Secret Manager, IAM | $0 idle; Google/Tripadvisor API usage |
-| P1 | `p1-terraform` | **Terraform for P0** (in progress: `infra/`) | Infrastructure as code, state, imports, drift, budget alert | $0 |
+| P1 | `p1-terraform` | **Terraform for P0** (started Nov 4: `infra/`) | Infrastructure as code, state, imports, drift, budget alert | $0 |
 | P2 | `p2-cicd` | GitHub Actions deploys on push, signed in with Workload Identity Federation | CI/CD, keyless auth, least privilege | $0 (Cloud Build free minutes) |
 | P3 | `p3-jobs` | Cloud Scheduler + Cloud Run job (e.g. refresh the Michelin lists nightly) | Jobs vs services, cron, retries | $0 (3 free scheduler jobs) |
 | P4 | `p4-monitoring` | Uptime check, alert policy, log-based metric, dashboard | Observability, alerting | $0 |

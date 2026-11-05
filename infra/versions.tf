@@ -1,6 +1,6 @@
 terraform {
-  # 1.7+ for "for_each" inside import blocks (imports.tf). Cloud Shell's Terraform is newer than this.
-  required_version = ">= 1.7"
+  # 1.6+ for import blocks whose IDs use variables (imports.tf). Check with: terraform version
+  required_version = ">= 1.6"
 
   required_providers {
     google = {

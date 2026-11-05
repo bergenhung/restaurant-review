@@ -27,15 +27,27 @@ Practically $0:
 
 Every resource gets the labels `lab=p0-app` and `managed-by=terraform`. In **Billing → Reports**, group by label `lab` to see cost per lab.
 
+## Before you start
+
+- The site is deployed from the latest code and working (the last `./deploy.sh` succeeded).
+- Note the map key the service uses now; it goes into `terraform.tfvars`:
+  ```bash
+  gcloud run services describe restaurant-review --region us-west1 \
+    --format='yaml(spec.template.spec.containers[0].env)' | grep -A1 GOOGLE_MAPS_BROWSER_KEY
+  ```
+- Optional budget alert: your billing account ID (`gcloud billing accounts list`). If you already
+  made a budget in the console, either skip this or delete that one afterwards, or you'll get two
+  sets of emails.
+
 ## First run (Cloud Shell)
 
 ```bash
 cd ~/restaurant-review && git pull
 cd infra
-terraform version                      # needs 1.7 or newer
+terraform version                      # needs 1.6 or newer
 PROJECT_ID=restaurants-review-summary ./bootstrap.sh
 cp terraform.tfvars.example terraform.tfvars
-nano terraform.tfvars                  # project_id; maps key and billing account if you use them
+nano terraform.tfvars                  # project_id, maps_browser_key, and billing_account if you want the alert
 ```
 
 Before planning, save today's settings so you can compare them afterwards:
