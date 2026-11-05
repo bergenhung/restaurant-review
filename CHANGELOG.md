@@ -2,6 +2,14 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-04 (city first)
+
+### Changed
+- **Cross streets: City comes first**, then Street and Cross street, since the street suggestions
+  are based on the city. Find checks the city first too. (`app/render.py`)
+- A suggestion list no longer pops open after you've moved on to another box (a slow answer for the
+  box you left is now ignored).
+
 ## 2026-11-04 (open filter)
 
 ### Added

@@ -122,7 +122,8 @@ AUTOCOMPLETE_JS = r"""
         li.addEventListener("mousedown", (e) => { e.preventDefault(); pick(i); });
         list.appendChild(li);
       });
-      const open = items.length > 0 || !!msg;
+      // A late answer for a box the person has already left stays closed.
+      const open = (items.length > 0 || !!msg) && document.activeElement === input;
       list.hidden = !open;
       input.setAttribute("aria-expanded", String(open));
       highlight(-1);
@@ -161,7 +162,7 @@ AUTOCOMPLETE_JS = r"""
       else if (e.key === "Enter" && active >= 0) { e.preventDefault(); pick(active); }
       else if (e.key === "Escape") { close(); }
     });
-    input.addEventListener("blur", () => setTimeout(close, 100));
+    input.addEventListener("blur", () => { clearTimeout(timer); if (ctrl) ctrl.abort(); setTimeout(close, 100); });
   }
 
   window.acAttach = attach;  // used by the results page's edit form
@@ -298,10 +299,10 @@ AUTOCOMPLETE_JS = r"""
       nLat.disabled = nLng.disabled = true;
       if (!nPid.value) { nPid.disabled = true; nSess.disabled = true; }
     } else if (startMode === "cross") {
+      // Without a city, "Broadway & Columbus" can land in Columbus, Ohio. It also steers the street suggestions.
+      if (!x3.value.trim()) return fail("Enter the city first, so the corner is found in the right place.", x3);
       if (!x1.value.trim()) return fail("Enter a street.", x1);
       if (!x2.value.trim()) return fail("Enter the cross street.", x2);
-      // Without a city, "Broadway & Columbus" can land in Columbus, Ohio.
-      if (!x3.value.trim()) return fail("Enter the city, so the corner is found in the right place.", x3);
       nAddr.value = x1.value.trim() + " & " + x2.value.trim() + ", " + x3.value.trim();
       nPid.disabled = nSess.disabled = nLat.disabled = nLng.disabled = true;
     } else {
@@ -471,9 +472,9 @@ def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
 <label class="pill"><input type="radio" name="start" value="map"> Map or my location</label>
 <label class="pill"><input type="radio" name="start" value="address"> Address</label></div>
 <div class="startpane wide grid3" data-start="cross">
+<label>City<input id="x3" placeholder="e.g. San Francisco, CA / 台北"></label>
 <label>Street<input id="x1" placeholder="e.g. 1st St / 忠孝東路"></label>
-<label>Cross street<input id="x2" placeholder="e.g. Mission St / 敦化南路"></label>
-<label>City<input id="x3" placeholder="e.g. San Francisco, CA / 台北"></label></div>
+<label>Cross street<input id="x2" placeholder="e.g. Mission St / 敦化南路"></label></div>
 <div class="startpane wide" data-start="address" hidden><label>Address<input name="address" required placeholder="Start typing, e.g. 2855 Stevens Creek Blvd, Santa Clara"></label></div>
 <div class="startpane wide" data-start="map" hidden>
 <div class="maptools"><label>Find a spot<input id="mapfind" placeholder="Address, landmark or cross streets, then pick or press Enter"></label>
@@ -482,7 +483,7 @@ def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
 <p class="muted" id="pinstatus" aria-live="polite">Click the map to drop a pin (drag it to adjust), find a spot, or use your location.</p></div>
 {filter_fields()}
 <button type="submit">Find</button>
-<p class="formerr" role="alert" hidden>Enter the cross streets.</p></form></fieldset>
+<p class="formerr" role="alert" hidden>Enter the city and cross streets.</p></form></fieldset>
 <fieldset id="panel-single" role="tabpanel" aria-labelledby="tab-single"><legend>Check one restaurant</legend><form id="verify-form" action="/v1/verify" method="get" novalidate>
 <input type="hidden" name="format" value="html"><input type="hidden" name="place_id"><input type="hidden" name="session">
 <label>Restaurant<input name="name" required placeholder="Start typing, e.g. Din Tai Fung"></label>
