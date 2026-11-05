@@ -15,20 +15,47 @@ def _minute_of_week(point: dict) -> int:
     return point.get("day", 0) * 1440 + point.get("hour", 0) * 60 + point.get("minute", 0)
 
 
-def is_open(hours: Hours, now_utc: datetime) -> bool | None:
-    if not hours.periods or hours.utc_offset_minutes is None:
-        return None
-    local = now_utc + timedelta(minutes=hours.utc_offset_minutes)
-    now = ((local.weekday() + 1) % 7) * 1440 + local.hour * 60 + local.minute  # Sunday = 0
+DAYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"]  # Google's order: day 0 = Sunday
+
+
+def _open_at(hours: Hours, minute_of_week: int) -> bool:
     for period in hours.periods:
         if "close" not in period:
             return True  # open 24 hours
         start, end = _minute_of_week(period["open"]), _minute_of_week(period["close"])
         if end <= start:
             end += WEEK  # crosses midnight on Saturday night
-        if start <= now < end or start <= now + WEEK < end:
+        if start <= minute_of_week < end or start <= minute_of_week + WEEK < end:
             return True
     return False
+
+
+def is_open(hours: Hours, now_utc: datetime) -> bool | None:
+    if not hours.periods or hours.utc_offset_minutes is None:
+        return None
+    local = now_utc + timedelta(minutes=hours.utc_offset_minutes)
+    return _open_at(hours, ((local.weekday() + 1) % 7) * 1440 + local.hour * 60 + local.minute)
+
+
+def is_open_on(hours: Hours, day: str, hhmm: str, now_utc: datetime | None = None) -> bool | None:
+    """Open on a weekday ("mon".."sun", or "today" in the restaurant's own time zone) at a local
+    time ("19:30")? None when the hours aren't known."""
+    if not hours.periods:
+        return None
+    try:
+        h, m = (int(x) for x in hhmm.split(":"))
+    except ValueError:
+        return None
+    if day == "today":
+        if hours.utc_offset_minutes is None:
+            return None
+        local = (now_utc or datetime.now(timezone.utc)) + timedelta(minutes=hours.utc_offset_minutes)
+        d = (local.weekday() + 1) % 7
+    elif day in DAYS:
+        d = DAYS.index(day)
+    else:
+        return None
+    return _open_at(hours, d * 1440 + h * 60 + m)
 
 
 def today_text(hours: Hours, now_utc: datetime) -> str | None:

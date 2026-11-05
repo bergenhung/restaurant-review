@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
 from app.dishes import extract_dishes
+from app.hours import is_open, is_open_on
 from app.matching import has_cjk, similarity
 from app.models import Alternative, Center, Link, Market, Place, RecentRating, Review, ResultRow, ResultTable, SourceRating
 from app.sources.google_places import GooglePlaces
@@ -206,6 +207,9 @@ class ReviewService:
         lat: float | None = None,
         lng: float | None = None,
         label: str | None = None,
+        open_when: str = "",
+        open_day: str = "today",
+        open_time: str | None = None,
     ) -> ResultTable:
         """The `count` restaurants closest to a starting point, found on Google, each then looked up
         on Tripadvisor and Michelin. The start is an address, cross streets ("1st St & Mission St,
@@ -224,9 +228,16 @@ class ReviewService:
             market = detect_market(f"{address} {label}", market)
         query = {"address": address, "count": count, "within_km": within_km, "cuisine": cuisine,
                  "price": price_levels, "min_rating": min_rating, "sort": sort}
+        if open_when == "now":
+            query["open"] = "now"
+        elif open_when == "at" and open_time:
+            query.update(open="at", open_day=open_day, open_time=open_time)
         # Rounded to ~10 m, so the same address typed or picked shares the cache.
         cache_key = (f"nearby|{RESULTS_VERSION}|{market.value}|{lat:.4f},{lng:.4f}|"
                      f"{sorted((k, str(v).lower()) for k, v in query.items() if k != 'address')}")
+        if query.get("open") == "now" or query.get("open_day") == "today":
+            # "Now" and "today" move on: reuse such a result for 15 minutes at most.
+            cache_key += f"|t{int(time.time() // 900)}"
         if cached := await self.store.get_cached(cache_key):
             log.info("cache hit", extra={"cache_key": cache_key})
             return ResultTable(**cached)
@@ -240,7 +251,16 @@ class ReviewService:
                 return False
             if price_levels and p.price_level not in price_levels:
                 return False
-            return not (min_rating and (p.rating or 0) < min_rating)
+            if min_rating and (p.rating or 0) < min_rating:
+                return False
+            if query.get("open"):
+                # Places whose hours Google doesn't know are left out: they can't be confirmed open.
+                if not p.hours:
+                    return False
+                ok = (is_open(p.hours, datetime.now(timezone.utc)) if query["open"] == "now"
+                      else is_open_on(p.hours, open_day, open_time))
+                return ok is True
+            return True
 
         found: dict[str, Place] = {}
         if not cuisine:
@@ -253,7 +273,7 @@ class ReviewService:
             text = f"{cuisine} restaurant" if cuisine else "restaurant"
             more = await self.google.area_search(
                 text, market, center, radius_m, price_levels=price_levels, min_rating=min_rating,
-                enough=lambda ps: sum(passes(p) for p in ps) >= count)
+                enough=lambda ps: sum(passes(p) for p in ps) >= count, open_now=query.get("open") == "now")
             for p in more:
                 found.setdefault(p.source_id, p)
         candidates = sorted(((distance_km(lat, lng, p.lat, p.lng), p) for p in found.values() if passes(p)),

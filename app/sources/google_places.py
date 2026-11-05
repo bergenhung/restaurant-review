@@ -134,7 +134,8 @@ class GooglePlaces:
 
     async def area_search(self, query: str, market: Market, center: tuple[float, float], radius_m: float,
                           price_levels: list[int] | None = None, min_rating: float | None = None,
-                          enough: Callable[[list[Place]], bool] | None = None, max_pages: int = 3) -> list[Place]:
+                          enough: Callable[[list[Place]], bool] | None = None, max_pages: int = 3,
+                          open_now: bool = False) -> list[Place]:
         """Text search (e.g. "ramen restaurant") limited to the area around a point, nearest first.
         Google pages results 20 at a time; more pages are fetched only until `enough` is satisfied."""
         language, region = LANG[market]
@@ -158,6 +159,8 @@ class GooglePlaces:
             body["priceLevels"] = _google_levels(price_levels)
         if min_rating:
             body["minRating"] = min_rating
+        if open_now:
+            body["openNow"] = True
         places: list[Place] = []
         for page in range(max_pages):
             resp = await self.client.post(SEARCH_URL, json=body,
@@ -217,18 +220,25 @@ class GooglePlaces:
         if not address:
             return None
         if is_intersection(address):
-            data = await self._geocoding({"address": address, "key": self.api_key,
-                                          **({"region": region.lower()} if region else {})})
+            geo = {"key": self.api_key, **({"region": region.lower()} if region else {})}
+            data = await self._geocoding({"address": address, **geo})
             if data:
-                r = data["results"][0]
-                if "intersection" not in r.get("types", []):
+                corner = _corner(data)
+                variant = with_street_suffixes(address)
+                if not corner and variant != address:
+                    # "Howard & Fremont, San Francisco" can come back as just "Howard St"; Google
+                    # finds the corner once the names say what they are: "Howard St & Fremont St".
+                    log.info("corner not found; retrying with street suffixes", extra={"address": address, "retry": variant})
+                    corner = _corner(await self._geocoding({"address": variant, **geo}) or {})
+                if not corner:
                     # "Broadway & Columbus" -> "Broadway, Columbus, OH": Google found a street, not a corner.
+                    first = data["results"][0]
                     raise AmbiguousLocation(
                         f"Couldn't find the corner '{address}'; the closest match was "
-                        f"{r.get('formatted_address', 'somewhere else')}. Add the city, e.g. "
-                        f"'Broadway & Columbus Ave, San Francisco, CA'.")
-                loc = r["geometry"]["location"]
-                return loc["lat"], loc["lng"], r.get("formatted_address") or address
+                        f"{first.get('formatted_address', 'somewhere else')}. Pick each street from the "
+                        f"suggestions, or write them out in full, e.g. 'Howard St' and 'Fremont St', and add the city.")
+                loc = corner["geometry"]["location"]
+                return loc["lat"], loc["lng"], corner.get("formatted_address") or address
         resp = await self.client.post(
             SEARCH_URL, json={"textQuery": address, "pageSize": 1, **({"regionCode": region} if region else {})},
             headers={**headers, "X-Goog-FieldMask": "places.location,places.formattedAddress"},
@@ -278,12 +288,14 @@ class GooglePlaces:
 
     async def autocomplete(self, text: str, kind: str, session_token: str | None = None,
                            bias: tuple[float, float] | None = None) -> list[dict]:
-        """Suggestions as the person types. kind is "restaurant", "location" (cities, districts)
-        or "address" (anything with a location: street addresses, landmarks, hotels)."""
+        """Suggestions as the person types. kind is "restaurant", "location" (cities, districts),
+        "street" (street names) or "address" (anything with a location: street addresses, landmarks, hotels)."""
         language = "zh-TW" if _has_cjk(text) else "en"
         body: dict = {"input": text, "languageCode": language}
         if kind == "location":
             body["includedPrimaryTypes"] = LOCATION_TYPES
+        elif kind == "street":
+            body["includedPrimaryTypes"] = ["route"]  # street names, for cross streets
         if session_token:
             body["sessionToken"] = session_token
         if bias:
@@ -417,6 +429,31 @@ def _level_from_range(pr: dict | None) -> int | None:
         if top <= limit:
             return level
     return 4
+
+
+STREET_SUFFIX = re.compile(
+    r"\b(?:st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|way|ln|lane|pl|place|ct|court|ter|terrace|"
+    r"hwy|highway|pkwy|parkway|cir|circle|sq|square|aly|alley|broadway|embarcadero|expy|expressway|plz|plaza)\.?$",
+    re.I)
+CORNER_SPLIT = re.compile(r"\s+(?:&|and|at|@|/)\s+|\s*&\s*|\s*/\s*", re.I)
+
+
+def with_street_suffixes(address: str) -> str:
+    """"Howard & Fremont, San Francisco" -> "Howard St & Fremont St, San Francisco". Names that
+    already say what they are ("Columbus Ave", "Broadway") and Chinese names are left alone."""
+    streets, _, rest = address.partition(",")
+    if _has_cjk(streets):
+        return address
+    parts = [x.strip() for x in CORNER_SPLIT.split(streets) if x.strip()]
+    if len(parts) != 2:
+        return address
+    parts = [x if STREET_SUFFIX.search(x) else f"{x} St" for x in parts]
+    return " & ".join(parts) + (f",{rest}" if rest else "")
+
+
+def _corner(data: dict) -> dict | None:
+    """The first geocoding result that's a real street corner, if any."""
+    return next((r for r in data.get("results", []) if "intersection" in r.get("types", [])), None)
 
 
 def _has_cjk(text: str) -> bool:

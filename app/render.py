@@ -51,6 +51,7 @@ button.secondary{background:transparent;color:var(--accent);border:1px solid var
 .formerr{color:#b91c1c;font-size:13px;grid-column:1/-1;margin:0}
 #map{height:380px;border-radius:12px;border:1px solid var(--line);margin:0 0 18px;background:var(--chip)}@media (max-width:640px){#map{height:280px}}
 .mapnote{color:var(--muted);font-size:13px;margin:0 0 16px}
+.openat{display:grid;gap:10px;grid-template-columns:1fr 1fr;grid-column:span 2}
 .editbar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 18px;
   grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
 .editbar .startfield{grid-column:span 2}@media (max-width:560px){.editbar .startfield{grid-column:1/-1}}
@@ -163,8 +164,10 @@ AUTOCOMPLETE_JS = r"""
     input.addEventListener("blur", () => setTimeout(close, 100));
   }
 
+  window.acAttach = attach;  // used by the results page's edit form
   // Check one restaurant: picking a suggestion pins the exact place.
   const vf = document.getElementById("verify-form");
+  if (!vf) return;  // not the search page
   const vName = vf.querySelector("[name=name]"), vLoc = vf.querySelector("[name=location]");
   const vPid = vf.querySelector("[name=place_id]"), vSess = vf.querySelector("[name=session]");
   // Suggestions favour the Location field when it's filled in (otherwise Google favours
@@ -216,6 +219,15 @@ AUTOCOMPLETE_JS = r"""
   // After the browser's Back button the previously picked option may be restored: show its fields.
   window.addEventListener("pageshow", () => { const r = radios.find(x => x.checked); if (r && r.value !== startMode) setStart(r.value); });
   attach(x3, "location", (s) => { x3.value = s.text || s.main; });
+  // Street names: suggestions favour the City box once it's filled. Picking the first street
+  // fills in the city from the suggestion, so the cross street is then looked up in that city.
+  const cityOf = (s) => (s.secondary || "").replace(/,\s*(USA|United States|Taiwan|台灣|臺灣)$/, "");
+  const street = (box) => attach(box, "street", (s) => {
+    box.value = s.main;
+    if (!x3.value.trim() && cityOf(s)) x3.value = cityOf(s);
+    nErr.hidden = true;
+  }, () => ({ near: x3.value.trim() }));
+  street(x1); street(x2);
 
   let pickMap = null, pickPin = null, pendingPin = null, mapLoading = false;
   function setPin(lat, lng, label) {
@@ -367,8 +379,29 @@ def filter_fields(query: dict | None = None) -> str:
         f'<label>Cuisine<input name="cuisine" value="{escape(str(q.get("cuisine") or ""))}" placeholder="Any, or e.g. ramen"></label>\n'
         f'<label>Price{_select("price", PRICES, _price_value(q.get("price")))}</label>\n'
         f'<label>Minimum rating{_select("min_rating", RATINGS, rating)}</label>\n'
-        f'<label>Order{_select("sort", SORTS, str(q.get("sort") or "distance"))}</label>'
+        f'<label>Order{_select("sort", SORTS, str(q.get("sort") or "distance"))}</label>\n'
+        + _open_fields(q)
     )
+
+
+OPEN_CHOICES = [("", "Any time"), ("now", "Open now"), ("at", "Open at…")]
+OPEN_DAYS = [("today", "Today"), ("mon", "Mon"), ("tue", "Tue"), ("wed", "Wed"), ("thu", "Thu"),
+             ("fri", "Fri"), ("sat", "Sat"), ("sun", "Sun")]
+
+
+def _open_fields(q: dict) -> str:
+    """Open: any time, now, or at a day and time (in each restaurant's own time zone)."""
+    when = str(q.get("open") or "")
+    toggle = ("var at=this.form.querySelector('.openat');at.hidden=this.value!=='at';"
+              "at.querySelectorAll('select,input').forEach(function(e){e.disabled=at.hidden})")
+    hidden = "" if when == "at" else " hidden"
+    off = "" if when == "at" else " disabled"
+    day = _select("open_day", OPEN_DAYS, str(q.get("open_day") or "today")).replace("<select ", f"<select{off} ", 1)
+    t = escape(str(q.get("open_time") or "19:00"))
+    choice = _select("open", OPEN_CHOICES, when).replace("<select ", f'<select onchange="{toggle}" ', 1)
+    return (f'<label>Open{choice}</label>\n'
+            f'<div class="openat"{hidden}><label>Day{day}</label>'
+            f'<label>Time<input type="time" name="open_time" value="{t}" step="900"{off}></label></div>')
 
 
 def _edit_bar(t: ResultTable, nearby: bool) -> str:
@@ -379,16 +412,44 @@ def _edit_bar(t: ResultTable, nearby: bool) -> str:
 <input type="hidden" name="format" value="html">
 <input type="hidden" name="lat" value="{c.lat}"><input type="hidden" name="lng" value="{c.lng}">
 <input type="hidden" name="label" value="{escape(c.label)}">
+<input type="hidden" name="place_id" disabled><input type="hidden" name="session" disabled>
 <label class="startfield">Near<input name="address" value="{escape(c.label)}"
-  oninput="var f=this.form;f.lat.value='';f.lng.value='';f.label.value='';f.lat.disabled=f.lng.disabled=f.label.disabled=true"></label>
+  oninput="var f=this.form;f.lat.value='';f.lng.value='';f.label.value='';f.lat.disabled=f.lng.disabled=f.label.disabled=true;f.place_id.disabled=f.session.disabled=true"></label>
 {filter_fields(t.query)}
-<button type="submit">Update</button></form>"""
+<button type="submit">Update</button></form>
+<script>
+document.addEventListener("DOMContentLoaded", () => {{
+  const f = document.querySelector("form.editbar"); if (!f || !window.acAttach) return;
+  // An address, cross streets or a landmark; picking one pins that exact spot.
+  window.acAttach(f.address, "address", (s, token) => {{
+    f.address.value = s.text || s.main;
+    f.place_id.value = s.place_id; f.session.value = token; f.place_id.disabled = f.session.disabled = false;
+  }});
+}});
+</script>"""
     q = t.query
     return f"""<form class="editbar" action="/v1/verify" method="get" aria-label="Change this search">
 <input type="hidden" name="format" value="html">
+<input type="hidden" name="place_id" disabled><input type="hidden" name="session" disabled>
 <label>Restaurant<input name="name" value="{escape(str(q.get("name") or ""))}" required></label>
 <label>Location<input name="location" value="{escape(str(q.get("location") or ""))}"></label>
-<button type="submit">Check</button></form>"""
+<button type="submit">Check</button></form>
+<script>
+document.addEventListener("DOMContentLoaded", () => {{
+  const f = document.querySelector("form.editbar"); if (!f || !window.acAttach) return;
+  // (form.name is the form's own name, so the fields are looked up explicitly)
+  const name = f.querySelector("[name=name]"), loc = f.querySelector("[name=location]");
+  const pid = f.querySelector("[name=place_id]"), sess = f.querySelector("[name=session]");
+  const clear = () => {{ pid.value = ""; pid.disabled = sess.disabled = true; }};
+  window.acAttach(name, "restaurant", (s, token) => {{
+    name.value = s.main; pid.value = s.place_id; sess.value = token; pid.disabled = sess.disabled = false;
+    if (!loc.value.trim()) loc.value = s.secondary;
+  }}, () => ({{ near: loc.value.trim() }}));
+  name.addEventListener("ac:typed", clear);
+  loc.addEventListener("input", clear);
+  window.acAttach(loc, "address", (s) => {{ loc.value = s.text || s.main; clear(); }});
+}});
+</script>"""
 
 def search_page(maps_key: str = "", map_id: str = "DEMO_MAP_ID") -> str:
     mapcfg = json.dumps({"key": maps_key, "mapId": map_id}).replace("</", "<\\/")
@@ -522,6 +583,15 @@ function initMap() {{
 <script async src="https://maps.googleapis.com/maps/api/js?key={escape(maps_key)}&loading=async&libraries=marker&callback=initMap"></script>"""
 
 
+def _clock(hhmm: str) -> str:
+    """"19:30" -> "7:30 PM"."""
+    try:
+        h, m = (int(x) for x in hhmm.split(":"))
+    except ValueError:
+        return hhmm
+    return f"{(h % 12) or 12}:{m:02d} {'AM' if h < 12 else 'PM'}"
+
+
 def _query_summary(query: dict, nearby: bool) -> str:
     if not nearby:
         return ", ".join(f"{k}: {v}" for k, v in query.items() if v not in (None, "", []))
@@ -532,6 +602,11 @@ def _query_summary(query: dict, nearby: bool) -> str:
         parts.append("price " + "/".join("$" * p for p in query["price"]))
     if query.get("min_rating"):
         parts.append(f"rated {query['min_rating']}+")
+    if query.get("open") == "now":
+        parts.append("open now")
+    elif query.get("open") == "at":
+        day = dict(OPEN_DAYS).get(str(query.get("open_day")), "today")
+        parts.append(f"open {day.lower() if day == 'Today' else day} at {_clock(str(query.get('open_time')))}")
     parts.append("highest rated first" if query.get("sort") == "rating" else "closest first")
     return " · ".join(parts)
 
@@ -676,4 +751,4 @@ def table_page(t: ResultTable, maps_key: str = "", map_id: str = "DEMO_MAP_ID") 
 {_alternatives_block(t)}
 {_map_block(t, maps_key, map_id)}
 <div class="wrap"><table><thead><tr><th>#</th><th>Restaurant</th>{'<th>Distance</th>' if nearby else ''}<th>All time</th>{head}<th>Last 3 months</th><th>Top dishes &amp; what diners say</th></tr></thead>
-<tbody>{''.join(body)}</tbody></table></div><ul class="notes">{notes}</ul></main></body></html>"""
+<tbody>{''.join(body)}</tbody></table></div><ul class="notes">{notes}</ul></main>{AUTOCOMPLETE_JS}</body></html>"""

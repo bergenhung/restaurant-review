@@ -221,7 +221,7 @@ async def health():
 async def autocomplete(
     request: Request,
     q: str = Query(..., min_length=2, max_length=100, description="What the person has typed so far"),
-    kind: Literal["restaurant", "location", "address"] = "restaurant",
+    kind: Literal["restaurant", "location", "address", "street"] = "restaurant",
     session: str | None = Query(None, max_length=64, description="Random ID per typing session (lowers Google billing)"),
     near: str | None = Query(None, max_length=120, description="Favour suggestions near this place, e.g. 'Taipei'"),
 ):
@@ -261,18 +261,24 @@ async def nearby(
     lat: float | None = Query(None, ge=-90, le=90, description="Start from this point (a map pin or your location)"),
     lng: float | None = Query(None, ge=-180, le=180),
     label: str | None = Query(None, max_length=200, description="Name for the lat/lng point, if already known"),
+    open_when: Literal["", "now", "at"] = Query("", alias="open", description="now, or at a day and time"),
+    open_day: Literal["today", "mon", "tue", "wed", "thu", "fri", "sat", "sun"] = Query(
+        "today", description="With open=at: the day, in the restaurant's own time zone"),
+    open_time: str | None = Query(None, pattern=r"^([01]?\d|2[0-3]):[0-5]\d$", description="With open=at: e.g. 19:30"),
     market: Market | None = Query(None, description="us or tw; detected from the address if omitted"),
     format: Literal["json", "html"] = "json",
 ):
     if (lat is None) != (lng is None):
         raise HTTPException(422, "Give both lat and lng.")
+    if open_when == "at" and not open_time:
+        raise HTTPException(422, "Give open_time (e.g. 19:30) with open=at.")
     if not address.strip() and not place_id and lat is None:
         raise HTTPException(422, "Give an address or cross streets, a place_id from autocomplete, or lat and lng.")
     table = await run(
         request.app.state.service.nearby(
             address.strip(), market, count, within_km, (cuisine or "").strip() or None, parse_price(price),
             parse_min_rating(min_rating), sort, place_id or None, session or None, lat, lng,
-            (label or "").strip() or None,
+            (label or "").strip() or None, open_when, open_day, open_time,
         )
     )
     return respond(table, format, request)

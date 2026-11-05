@@ -857,3 +857,103 @@ def test_tripadvisor_postal_code_off_retries_by_name(make_client, mock_apis):
     assert [p.get("postal_code") for p in seen] == ["98123", None]
     ta = next(r for r in row["ratings"] if r["source"] == "tripadvisor")
     assert ta["source_id"] == "4242" and row["source_status"]["tripadvisor"] == "matched"
+
+
+def _geocode_howard_fremont(req):
+    """Google answers "Howard & Fremont" with just the street, and finds the corner once the names
+    say "St"; "Broadway & Columbus" with no city lands on a street in Columbus, Ohio, either way."""
+    address = req.url.params.get("address", "")
+    if address == "Howard St & Fremont St, San Francisco":
+        return Response(200, json={"status": "OK", "results": [{
+            "formatted_address": "Howard St & Fremont St, San Francisco, CA 94105, USA", "types": ["intersection"],
+            "geometry": {"location": {"lat": 37.7894, "lng": -122.3953}}}]})
+    if address.startswith("Howard"):
+        return Response(200, json={"status": "OK", "results": [{
+            "formatted_address": "Howard St, San Francisco, CA, USA", "types": ["route"],
+            "geometry": {"location": {"lat": 37.78, "lng": -122.40}}}]})
+    return Response(200, json={"status": "OK", "results": [{
+        "formatted_address": "Broadway, Columbus, OH, USA", "types": ["route"],
+        "geometry": {"location": {"lat": 39.96, "lng": -83.0}}}]})
+
+
+def test_cross_streets_found_once_named_as_streets(make_client, mock_apis):
+    mock_apis.routes[0].mock(side_effect=_sf_or_taipei)
+    geo = mock_apis.get(GEOCODE).mock(side_effect=_geocode_howard_fremont)
+    with make_client(yelp_key="") as c:
+        data = c.get("/v1/nearby", params={"address": "Howard & Fremont, San Francisco"}).json()
+        wrong = c.get("/v1/nearby", params={"address": "Broadway & Columbus"})
+    assert data["center"]["label"] == "Howard St & Fremont St, San Francisco, CA 94105, USA"
+    tried = [x.request.url.params["address"] for x in geo.calls]
+    assert tried[:2] == ["Howard & Fremont, San Francisco", "Howard St & Fremont St, San Francisco"]
+    # Still no corner: a clear message instead of searching around a street in another state.
+    assert wrong.status_code == 422 and "Columbus, OH" in wrong.json()["detail"]
+
+
+def test_street_suggestions(make_client, mock_apis):
+    with make_client() as c:
+        c.get("/v1/autocomplete", params={"q": "Howa", "kind": "street", "near": "San Francisco"})
+    bodies = [json.loads(x.request.content) for x in mock_apis.routes[3].calls]
+    assert bodies[-1]["includedPrimaryTypes"] == ["route"] and "locationBias" in bodies[-1]
+
+
+def test_street_suffixes():
+    from app.sources.google_places import with_street_suffixes as w
+    assert w("Howard & Fremont, San Francisco") == "Howard St & Fremont St, San Francisco"
+    assert w("Broadway & Columbus Ave, San Francisco, CA") == "Broadway & Columbus Ave, San Francisco, CA"
+    assert w("1st and Mission, San Francisco") == "1st St & Mission St, San Francisco"
+    assert w("忠孝東路 & 敦化南路, 台北") == "忠孝東路 & 敦化南路, 台北"
+
+
+def _with_hours(pid, name, periods, dlat):
+    p = google_place(pid, name, 4.5, 300, address="San Francisco, CA 94133, USA")
+    p["location"] = {"latitude": 37.7980 + dlat, "longitude": -122.4065}
+    p["utcOffsetMinutes"] = -480
+    p["regularOpeningHours"] = {"periods": periods, "weekdayDescriptions": [f"{d}: hours" for d in
+                                ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]]}
+    return p
+
+
+def _every_day(open_h, close_h):
+    return [{"open": {"day": d, "hour": open_h, "minute": 0}, "close": {"day": d, "hour": close_h, "minute": 0}}
+            for d in range(7)]
+
+
+def test_open_filter(make_client, mock_apis):
+    lunch = _with_hours("l1", "Lunch Only", _every_day(11, 15), 0.0005)
+    dinner = _with_hours("d1", "Dinner Place", _every_day(17, 22), 0.0010)
+    weekend = _with_hours("w1", "Weekend Brunch", [{"open": {"day": 6, "hour": 9, "minute": 0},
+                                                    "close": {"day": 6, "hour": 14, "minute": 0}}], 0.0015)
+    unknown = google_place("u1", "No Hours Listed", 4.5, 300)
+    unknown["location"] = {"latitude": 37.7981, "longitude": -122.4065}
+    places = {"places": [lunch, dinner, weekend, unknown]}
+    loc = {"places": [{"location": {"latitude": 37.7980, "longitude": -122.4065}, "formattedAddress": "SF"}]}
+    mock_apis.routes[0].mock(side_effect=lambda req: Response(200, json=loc if json.loads(req.content).get("pageSize") == 1
+                                                              and "rankPreference" not in json.loads(req.content) else places))
+    base = {"address": "SF", "count": 5}
+    with make_client(yelp_key="") as c:
+        fri_dinner = c.get("/v1/nearby", params={**base, "open": "at", "open_day": "fri", "open_time": "19:30"}).json()
+        sat_10 = c.get("/v1/nearby", params={**base, "open": "at", "open_day": "sat", "open_time": "10:00"}).json()
+        html = c.get("/v1/nearby", params={**base, "open": "at", "open_day": "sat", "open_time": "10:00",
+                                           "format": "html"}).text
+        missing_time = c.get("/v1/nearby", params={**base, "open": "at"})
+        any_time = c.get("/v1/nearby", params=base).json()
+    assert [r["name"] for r in fri_dinner["rows"]] == ["Dinner Place"]
+    assert [r["name"] for r in sat_10["rows"]] == ["Weekend Brunch"]
+    assert len(any_time["rows"]) == 4  # no filter: everything, including unknown hours
+    assert missing_time.status_code == 422
+    assert "open Sat at 10:00 AM" in html
+    bar = html[html.index('class="editbar"'):]
+    assert '<option value="at" selected>' in bar and '<option value="sat" selected>' in bar and 'value="10:00"' in bar
+
+
+def test_open_on_day_and_time():
+    from datetime import datetime, timezone
+    from app.hours import is_open_on
+    from tests.test_units import _daily, _hours
+    late = _hours(_daily(18, 2, close_next_day=True), offset=480)  # 6 PM - 2 AM, Taipei
+    assert is_open_on(late, "sat", "23:30") is True
+    assert is_open_on(late, "sun", "01:00") is True   # still Saturday night's opening
+    assert is_open_on(late, "sun", "03:00") is False
+    # "today" is the restaurant's own day: 20:00 UTC Friday = 4 AM Saturday in Taipei -> Saturday.
+    sat_only = _hours([{"open": {"day": 6, "hour": 12, "minute": 0}, "close": {"day": 6, "hour": 14, "minute": 0}}], offset=480)
+    assert is_open_on(sat_only, "today", "13:00", datetime(2026, 11, 6, 20, 0, tzinfo=timezone.utc)) is True

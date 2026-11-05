@@ -2,6 +2,34 @@
 
 What changed in the app (P0) and the infrastructure, newest first.
 
+## 2026-11-04 (open filter)
+
+### Added
+- **Open filter** on "Restaurants near an address" (search page and the results page's edit form):
+  Any time, Open now, or Open at a day (Today, Mon–Sun) and time. Checked against each restaurant's
+  Google opening hours in its own time zone, so "Fri 7:30 PM" means 7:30 PM where the restaurant is,
+  and a late opening that runs past midnight counts for the next morning. Places whose hours Google
+  doesn't list are left out while the filter is on. API: `open=now`, or `open=at&open_day=fri&open_time=19:30`.
+  Results for "now" or "today" are reused for 15 minutes at most. (`app/hours.py`, `app/service.py`,
+  `app/main.py`, `app/render.py`, `app/sources/google_places.py`)
+
+## 2026-11-04
+
+### Added
+- **Street suggestions for cross streets.** The Street and Cross street boxes suggest street names
+  as you type (favouring the City box's city once it's filled in); picking the first street also
+  fills in the city. (`app/render.py`, `app/main.py`, `app/sources/google_places.py`: autocomplete
+  kind `street`)
+- **Suggestions on the results page's edit form:** "Near" suggests addresses and places; for one
+  restaurant, Restaurant and Location suggest as on the search page.
+
+### Fixed
+- **Cross streets without "St"** ("Howard" & "Fremont", San Francisco): Google sometimes answers
+  with just one of the streets. The corner is now looked up once more as "Howard St & Fremont St"
+  (names that already say Ave, Blvd, Broadway… are left as they are), and any corner among Google's
+  answers is used, not only the first. When there's still no corner, the message suggests picking
+  the streets from the suggestions. (`app/sources/google_places.py`)
+
 ## 2026-11-03 (Tripadvisor matching)
 
 ### Fixed
