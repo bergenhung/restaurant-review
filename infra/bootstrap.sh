@@ -13,6 +13,12 @@ BUCKET="${PROJECT_ID}-tfstate"
 
 gcloud config set project "$PROJECT_ID" >/dev/null
 
+# Terraform sends its calls under this project (user_project_override in versions.tf), so the APIs it
+# needs before it can enable anything itself must already be on. They're free switches.
+echo "==> Enabling the APIs Terraform needs to start"
+gcloud services enable cloudresourcemanager.googleapis.com serviceusage.googleapis.com \
+  iam.googleapis.com billingbudgets.googleapis.com --project "$PROJECT_ID"
+
 if ! gcloud storage buckets describe "gs://$BUCKET" >/dev/null 2>&1; then
   echo "==> Creating gs://$BUCKET"
   gcloud storage buckets create "gs://$BUCKET" --location="$REGION" \

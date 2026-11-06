@@ -8,6 +8,9 @@ What changed in the app (P0) and the infrastructure, newest first.
 - `infra/`: brought in line with the live service: container name `restaurant-review-1` (as gcloud
   named it), Terraform 1.6+ (secret imports written out instead of a loop), and a "Before you start"
   checklist in `infra/README.md` (map key, existing budget).
+- `infra/bootstrap.sh` enables Cloud Resource Manager, Service Usage, IAM and Billing Budgets first.
+  Terraform sends its calls under the project (`user_project_override`), so these must already be on
+  before the first `terraform plan` (otherwise: "Cloud Resource Manager API has not been used…").
 
 ## 2026-11-04 (city first)
 
